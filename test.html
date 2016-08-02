@@ -1,0 +1,157 @@
+<html>
+    <head>
+        <link href="rule.css" type="text/css" rel="stylesheet"/>
+        <script type="text/javascript" src="lexer.js"></script>
+        <script type="text/javascript" src="parser.js"></script>
+        <script type="text/javascript" src="interpreter.js"></script>        
+        <script type="text/javascript" src="evaluator.js"></script>        
+        <script   src="https://code.jquery.com/jquery-1.12.4.min.js"   integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="   crossorigin="anonymous"></script>
+        <script>
+                $(document).ready(function(){
+                    $("#parseRule").click(function(){
+                        checkClinicalComorbidities();
+                    });    
+                });
+                
+                /*var variables = {
+                    "minHb":10,
+                    "minHc":40,
+                    "prevMinHb":90,
+                    "prevMinHc":90,
+                    "lowHb":13.5,
+                    "lowHc":40,
+                    "temperature": 60,
+                    "minwbc": 10,
+                    "minrbc": 20, 
+                    "minplt": 20,
+                    "wbclow": 50,
+                    "rbclow": 60,
+                    "pltlow": 70,
+                    "minbicarbonate":30,
+                    "maxbicarbonate":50,
+                    "chol":210
+                }*/
+                //var ruleTextE = '[{"anemia":[{ "normal": "( ( minHb > lowHb ) && ( minHc > lowHc ) )"},{ "acute": "( ( ( minHb < lowHb ) || ( minHc < lowHc ) ) && ( ( prevMinHb > lowHb ) && ( prevMinHc > lowHc ) ) )"}]},{"high temperature":"( temperature > 50 )"}]';                
+                
+                function checkClinicalComorbidities()
+                {
+                    var resultObj = document.getElementById("result");
+                    resultObj.innerHTML = "";
+                    var varObj = document.getElementById("variables");
+                    var variables = JSON.parse(varObj.value);
+                    var rulesObj = document.getElementById("rules");
+                    var ruleText = rulesObj.value;                    
+                    var ruleJSON = JSON.parse(ruleText);            
+                    var result = processRules(ruleJSON, variables);                    
+                    var htmlStr = "";
+                    htmlStr += "<ul>";
+                    for (var key in result)
+                    {
+                        if (!result.hasOwnProperty(key)) {
+                            continue;
+                        }
+                        
+                        if (typeof(result[key]) == 'object') {
+                            htmlStr += "<li>"+key+"</li><ul>";
+                            for (var inkey in result[key]) {
+                                if (!result[key].hasOwnProperty(inkey)) {
+                                    continue;
+                                }
+                                var foundclass = "style='color:black'";
+                                if (result[key][inkey]===true)
+                                    foundclass = "style='color:blue'";
+                                    htmlStr += "<li "+foundclass+">"+inkey+":"+result[key][inkey]+"</li>";
+                            }
+                            htmlStr += "</ul>";
+                        }
+                        else {
+                            var foundclass = "style='color:black'";
+                            if (result[key]===true)
+                                foundclass = "style='color:blue'";
+                            htmlStr += "<li "+foundclass+">"+key+":"+result[key]+"</li>"
+                        }
+                    }
+                    htmlStr += "</ul>";
+                    resultObj.innerHTML = htmlStr;
+                }
+        </script>
+    </head>
+    <body>
+        <div style='display:none'>
+			<div style='display:inline-block'>
+				<span>
+					<button class="button" id="addR">Add Rule</button>
+					<button class="button" id="editR">Modify Rule</button>
+				</span>
+				<div id="newRule">
+					Rule Title: <input type='text' /> <input type='checkbox'/>Has Subrules?
+					<div>Add Condition</div>
+					<div>Define Subrule</div>
+					<input type='text' />
+					<div>Add new Subrule</div>
+					<input type='text' />
+				</div>
+				<div id="oldRule">
+					<select id="definedRules">
+						<option>Select Rule to Modify</option>
+					</select>
+				</div>
+			</div>
+			<div style='display:inline-block'>
+				<p>Defined rules</p>
+				<div>WW</div>
+			</div>
+        </div>
+        <div width="100%" >
+            <div style='display:inline-block;width:20%'>            
+                    Variables<br/>
+                    <textarea id="variables">
+ {
+"minHb":10, "minHc":40,
+"prevMinHb":90, "prevMinHc":90,
+"lowHb":13.5, "lowHc":40,
+"temperature": 60, "minwbc": 10,
+"minrbc": 20, "minplt": 20,
+"wbclow": 50, "rbclow": 60,
+"pltlow": 70, "minbicarbonate":30,
+"maxbicarbonate":50, "chol":210,
+"sys":123, "dias":100
+                }
+                </textarea>
+            </div>
+            <div style='display:inline-block;width:75%'>
+                Rule Definitions<br/>
+                <textarea id="rules">
+[
+    {"Anemia":[
+                { "Normal": "( ( minHb > lowHb ) && ( minHc > lowHc ) )"},
+                { "Acute": "( ( ( minHb < lowHb ) || ( minHc < lowHc ) ) && ( ( prevMinHb > lowHb ) && ( prevMinHc > lowHc ) ) )"},
+                { "Anemic": "( ( ( minHb < lowHb ) || ( minHc < lowHc ) ) && ( ( prevMinHb == -1 ) && ( prevMinHc == -1 ) ) )"},
+                { "Chronic": "( ( ( minHb < lowHb ) || ( minHc < lowHc ) ) && ( ( prevMinHb < lowHb ) || ( prevMinHc < lowHc ) ) )"}
+              ]},                                                                                              
+                                                                                              
+    {"Pancytopenia": [
+                {"Due to Chemotherapy" : "( ( minwbc < wbclow ) && ( minrbc < rbclow ) && ( minplt < pltlow ) )"},
+                {"Due to Drugs" : "( ( minwbc < wbclow ) && ( minrbc < rbclow ) && ( minplt < pltlow ) )"},
+                {"Not Otherwise Specified" : "( ( minwbc < wbclow ) && ( minrbc < rbclow ) && ( minplt < pltlow ) )"}
+              ]},
+    {"Acidbasedisorder" : [
+                    {"Metabolic Acidosis": "( minbicarbonate < 18.0 ) "},
+                    {"Metabolic Alkalosis": "( maxbicarbonate > 30.0 )"}
+                    ]},
+    {"HyperCholesterolemia" : "( chol > 200 )"},
+    {"Hypertension" : [
+            {"Hypertension" : "( sys > 140 && dias > 90 )"},
+            {"Elevated Blood Pressure" : "( sys > 140 && dias > 90 )"}]
+    }
+]
+                </textarea>
+            </div>    
+        </div>
+        <button id="parseRule" class="button">Compute Clinical Comorbidities</button>
+        <div>            
+            <p id="result">
+            </p>
+        </div>
+    </body>
+</html>

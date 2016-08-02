@@ -1,0 +1,534 @@
+<html>
+	<head>
+		<style>           
+			#namecomponent {
+				margin:20px;
+			}
+            .preselect h2 a:before {
+				content:"+      "
+			}
+			.preselect {
+				margin:10px;
+				border:1px solid #5eaaeb;
+			}
+			.preselect h2{      
+				margin:0px;
+				font-size: 20px;
+                padding-bottom : 5px;
+				background-color: #337ab7;
+				color: white;
+                border: 1px solid #337ab7;
+                border: 1px solid #337ab7;
+            }
+			.preselect h2 a.active:before {
+				content:"-      ";
+			}            
+            .preselect h2 a{
+				margin: 10px;
+                color: inherit;
+                text-decoration: none;               
+            }   
+			#categorycomponent{
+				margin: 10px;
+			}
+            .expandcollapse {
+                
+            }
+			.ruleTemplate {
+				border-left: 5px solid #dff0d8;
+				border-top: 1px solid #dff0d8;
+			}
+			.ruleconditions {
+				margin: 10px;
+				border:1px solid #dff0d8;
+			}			
+			.ruleconditions h2{      
+				margin:0px;
+				padding:5px;
+				font-size: 20px;
+				background-color: #dff0d8;
+				color: #3c763d;
+                border: 1px solid #dff0d8;
+                border: 1px solid #dff0d8;
+            }			
+			button {
+				background-color:#5cb85c;
+				color:white;
+				display: inline-block;
+				padding: 6px 12px;
+				margin-bottom: 0;
+				font-size: 14px;
+				font-weight: 400;
+				line-height: 1.5;
+				text-align: center;
+				white-space: nowrap;
+				vertical-align: middle;
+				-ms-touch-action: manipulation;
+				touch-action: manipulation;
+				cursor: pointer;
+				-webkit-user-select: none;
+				-moz-user-select: none;
+				-ms-user-select: none;
+				user-select: none;
+				background-image: none;
+				border: 1px solid #5cb85c;
+				border-radius: 4px;
+			}
+			select {
+				height: 30px;
+				font-size:20px;
+			}
+            .textoperators button {
+                background-color:dimgrey;
+                border-color:dimgrey;
+            }
+            .textrule {
+                border:2px solid red;
+                font-size:20px; 
+                font-weight:bold;
+            }
+            .isrulevalid {
+                text-align: right;
+                color:red;
+            }
+		</style>
+		<link rel="stylesheet" type="text/css" href="rulegen.css"/>
+		<script   src="https://code.jquery.com/jquery-1.12.4.min.js"   integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="   crossorigin="anonymous"></script>
+		 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css" rel="stylesheet" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
+		<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+		<script>
+		var operators = [
+			{"id":"<", "name":"less than"},
+			{"id":">", "name":"greater than"},
+			{"id":"==", "name":"equals"},
+			{"id":"<=", "name":"less than or equal to"},
+			{"id":">=", "name":"greater than or equal to"},
+			{"id":"!=-1", "name":"is present"},
+			{"id":"==-1", "name":"is not present"}
+		];
+			
+		var commonSelectors = [
+			{"id":"number", "name":"value"},
+			{"id":"text", "name":"text"}
+		];
+		var labValues= [
+		  {
+			"id": "minHb",
+			"name": "Minimum Hemoglobin"
+		  },
+		  {
+			"id": "minHc",
+			"name": "Minimum Hematocrit"
+		  },
+		  {
+			"id": "prevMinHb",
+			"name": "Previous Minimum Hemoglobin"
+		  },
+		  {
+			"id": "prevMinHc",
+			"name": "Previous Minimum Hematocrit"
+		  },
+		  {
+			"id": "lowHb",
+			"name": "low Hemoglobin standard"
+		  },
+		  {
+			"id": "lowHc",
+			"name": "low Hematocrit standard"
+		  }
+		  
+		];
+			
+
+		$(document).ready(function() {
+									
+			$("#rulename").focus();
+			var $select = $('#values');			
+			//iterate over the data and append a select option
+			$.each(labValues, function(key, val){ 
+				$select.append('<option id="' + val.id + '">' + val.name + '</option>');
+			});			
+			
+            $(".multipreselect").select2(
+				{width: 'resolve',
+				 closeOnSelect: false
+			});
+			
+			$(".multipreselect").on("select2:select select2:unselect", function (e) {
+				//this returns all the selected item
+				var items= $(this).select2('data'); 
+				console.log(items)
+				var preselectOptions = [];
+				$.each(items, function (index, element){
+					preselectOptions.push({"id":element.id, "name": element.text});
+				});
+				console.log(preselectOptions);				
+			})
+			
+			var $selectN = $(".lhs");
+			$.each(labValues, function(key, val){ 
+				$selectN.append('<option id="' + val.id + '">' + val.name + '</option>');
+			});
+			 
+			$selectN = $(".rhs");
+			$.each(labValues, function(key, val){ 
+				$selectN.append('<option id="' + val.id + '">' + val.name + '</option>');
+			  });
+			
+			$selectN = $(".operator");			
+			$.each(operators, function(key, val){ 
+				$selectN.append('<option id="' + val.id + '">' + val.name + '</option>');
+			  });
+    
+			$('.preselect div').hide();
+			$('.preselect a').click(function(e){
+				$('.preselect div').slideToggle('slow');
+				$(this).toggleClass('active');
+				e.preventDefault();
+			});
+
+			$(".tabs-menu a").click(function(event) {
+				event.preventDefault();
+				$(this).parent().addClass("current");
+				$(this).parent().siblings().removeClass("current");
+				var tab = $(this).attr("href");
+				$(".tab-content").not(tab).css("display", "none");
+				$(tab).fadeIn();
+			});
+			
+			$("#rulename").keyup(function(){					
+				$("#declaredrule").html($(this).val());
+				$(".definition").val($(this).val()).attr("disabled", true);
+			});
+			
+			$(".addAnother button").click(function() {
+				addSubCategory();				
+			});					
+			
+			$("#hassubcategory").change(function(){
+				if (this.checked) {
+					$(".addAnother").show();
+					$(".definition").attr("disabled", false).val('').focus();	
+				} else {
+					$("#ruleconditioncomponent .ruleconditions").not(':first').remove();			
+					$(".definition").val($("#rulename").val());
+					$(".definition").attr("disabled", true);
+					$(".addAnother").hide();
+					
+				}
+			});
+            
+            $("#ruleconditioncomponent").on("click", ".ruleconditions h2 .expandcollapse", function() {
+                if ($(this).text() === '+') {
+                    $(this).text('-');
+                    console.log($(this).parent().next());
+                    $(this).parent().next().slideToggle();
+                }
+                else {
+                    $(this).text('+');
+                    $(this).parent().next().slideToggle();
+                }
+                    
+               
+            });
+			
+			$("#ruleconditioncomponent").on("click",".ruleconditions h2 button", function(){
+				$(this).parent().parent().remove();
+                //populateRuleText();
+			});
+			
+			$("#ruleconditioncomponent").on("click",".ruleTemplate .groupcondition", function() {			
+				var html = $("#subcategoryTemplate .ruleTemplate").clone().wrap('<p/>').parent().html();				
+				$(this).parent().parent().append(html);				
+                //console.log("add group condition ", $(this).parents());
+                populateRuleText($(this).parents());
+			});			
+			
+			$("#ruleconditioncomponent").on("click",".ruleTemplate .condition", function() {			
+				var html = $("#conditionTemplate").html();
+				$(this).parent().append(html)
+                //console.log("add condition ", $(this).parents());
+                populateRuleText($(this).parents());
+			});
+			
+			$("#ruleconditioncomponent").on("click",".ruleTemplate .removecondition", function() {
+                var cacheParents = $(this).parents();
+				$(this).parent().remove();
+                //console.log("remove condition : ", $(this).parents());
+                populateRuleText(cacheParents);
+			});
+			
+			$("#ruleconditioncomponent").on("click",".ruleTemplate .removegroupcondition", function() {
+                var cacheParents = $(this).parents();
+				$(this).parent().parent().remove();
+                //console.log("removegroupcondition : ", $(this).parents());
+                populateRuleText(cacheParents);
+			});
+            
+            $("#ruleconditioncomponent").on("change", ".anyall", function() {
+                //console.log("change condition " ,$(this).parents());
+                populateRuleText($(this).parents());
+            });
+            
+            $("#ruleconditioncomponent").on("change", ".acondition", function() {
+                //console.log("change condition " ,$(this).parents());
+                populateRuleText($(this).parents());
+            });
+			
+            $(".labattributes .labvals").click(function() {
+                var obj = $(this).parent().parent().siblings().find("textarea");                
+                obj.val(obj.val() + $(this).text() + " ");
+                obj.focus();
+            });
+
+            $(".textoperators button").click(function(){
+                var obj = $(this).parent().parent().find("textarea");
+                var text = $(this).text().toUpperCase();
+                if (text === 'AND' || text === 'OR')
+                    obj.val(obj.val() + text + " \n");
+                else
+                    obj.val(obj.val() + text + " ");
+                obj.focus();
+            });
+			
+		}); // end of document ready function
+                        
+        function determineCurrentRuleDiv(parents) {
+            for (var i = 0; i < parents.length; i++) {
+                if( parents[i].className === 'textandlogicalform')
+                    return parents[i];
+            }
+            return null;
+        }
+                        
+        function populateRuleText(parents) {
+            var parentObj = determineCurrentRuleDiv(parents);
+            if (parentObj) {
+                console.log($(parentObj).find(".textform .textrule"));
+                $(parentObj).find(".textform .textrule").val(getRuleString());
+            }
+        }
+        function getRuleString(obj) {
+            var str = "";
+            if (!obj)
+                obj = $(".logicalForm .ruleTemplate")
+            var paraObj = $(obj).children().first();                                 
+            var andOr = $(paraObj).find("select.anyall").val();
+            andOr =  (andOr === 'Any')?" OR \n" : " AND \n";                   
+            var conditions = $(obj).children().first().find(".acondition");            
+            var conditionsLength = conditions.length;
+            var counter = 0;
+            $(conditions).each(function() {
+                str += $(this).find(".lhs").val()+ " " + 
+                       $(this).find(".operator").val().toUpperCase()+" "+
+                        $(this).find(".rhs").val();
+                counter++;
+                if (counter != conditionsLength)
+                    str += andOr;
+            });  
+            $(obj).first().children().not(":first").filter(".ruleTemplate").each(function(index, element) {                
+                var inStr = getRuleString($(element));
+                if (str.length == 0 && inStr.length > 0)
+                {
+                    str += " [ " + inStr +" ] ";                    
+                }
+                else if (inStr.length  > 0) 
+                {
+                    str += andOr + " [ " + inStr +" ] ";
+                }              
+            });                                             
+            return str;
+        }
+            
+        
+        function beautifyRule(textelement) {
+            var ruleText = $(textelement).val();
+            var newText = '';
+            for (var i = 0, len = ruleText.length; i < len; i++) {
+                
+            }
+            $(textelement).val(newText);
+            return;
+        }
+				
+		function addSubCategory()
+		{
+			var html = $("#subcategoryTemplate").html();
+			$("#ruleconditioncomponent").append(html);			
+			$("#ruleconditioncomponent .definition:last").focus();
+
+			$("#ruleconditioncomponent .ruleconditions:last .removegroupcondition:first").remove();			
+		}
+						
+		</script>
+	</head>
+	<body>
+		<div id = "conditionTemplate" style="display:none">
+			<div style="margin:10px" class="acondition">
+				<select class="lhs"></select>&nbsp;&nbsp;
+				<select class="operator"></select>&nbsp;&nbsp;
+				<select class="rhs"></select>&nbsp;&nbsp;&nbsp;&nbsp;
+				<button class="removecondition" style="background-color:red;border-color:red">Remove</button>
+			</div>
+		</div>
+		<div id = "subcategoryTemplate" style='display:none'>
+			<div class = "ruleconditions">
+				<h2><span class='expandcollapse'>-</span> Conditions for : <input class="definition" type = 'text'/>&nbsp;&nbsp;&nbsp;&nbsp;<button style='background-color:red;border-color:red'>X</button></h2>	
+				<div style="margin:20px" class="ruleTemplate">			
+					<p style="margin:10px">Match 
+						<select class="anyall">
+							<option>All</option>
+							<option>Any</option>
+						</select>
+						of the following conditions:						
+						<button class="condition" >Add condition</button>
+						<button class="groupcondition" style='background-color:grey;border-color:grey'>Add group of conditions</button>
+						<button class="removegroupcondition" style="background-color:red;border-color:red">Remove group condition</button>
+					</p>					
+				</div>
+			</div>
+		</div>
+		<div id="tabs-container">
+			<ul class="tabs-menu">
+				<li class="current"><a href="#tab-1">Add Rule</a></li>
+				<li><a href="#tab-2">Edit Rule</a></li>
+			</ul>
+			<div class="tab">
+				<div id="tab-1" class="tab-content">					
+					<div id="addrule">
+						<div id="namecomponent">
+							<span>Comorbidity Name: <input type="text" id="rulename"/></span>
+							<span style='display:none;color:red'>Water</span>
+						</div>
+						<div id="preselectcomponent">
+							<div class = "preselect">
+								<h2><a href = "#">Preselect Lab Values for the Rule</a></h2>
+								<br/>
+								<div style="margin:20px">								
+									<select id = "values" style = "margin:10px;width: 100%" class="multipreselect" multiple="multiple" size="5">
+									</select> 
+								</div>
+							</div>
+						</div>
+						<div id="categorycomponent">
+							<h4><input id="hassubcategory" type="checkbox"/>Does "<span id="declaredrule"></span>" have subcategories?</h4>
+						</div>
+						<div id = "ruleconditioncomponent">
+							<div class = "ruleconditions">
+								<h2><span class='expandcollapse'>-</span> Conditions for : <input class="definition" type = 'text'/></h2>
+								<div class="textandlogicalform">
+                                    <div class="textform" style="margin-top:5px;margin-left:20px;margin-bottom:5px;">
+                                        <div style="overflow: auto; width:100%; height:25%">
+                                            <div style="float: left; width:20%; margin-top:10px;margin-left:10px;margin-right:10px;height:90%">
+                                                <input type="text" style='width:80%;height:25px'/>
+                                                <div style='width:100%;overflow:auto;height:80%' class="labattributes">
+                                                    <p class="labvals">Minimum Hemoglobin level</p>
+                                                    <p class="labvals">Maximum Hemoglobin level</p>
+                                                    <p class="labvals">low Hemoglobin level</p>
+                                                    <p class="labvals">low Hematocrit level</p>
+                                                    <p class="labvals">Minimum Hematocrit level</p>
+                                                    <p class="labvals">Maximum Hematocrit level</p>
+                                                </div>
+                                            </div>
+                                            <div style="cursor:col-resize;float:left;width:5px;height:90%;background-color:black">&nbsp;</div>
+                                            <div style="float: left;margin:10px;height:90%;width:65%">
+                                                <div style='margin:10px' class='textoperators'>
+                                                    <button>and</button>
+                                                    <button>or</button>
+                                                    <button>equals</button>
+                                                    <button>less than</button>
+                                                    <button>greater than</button>
+                                                    <button>less than or equal to</button>
+                                                    <button>greater than or equal to</button>
+                                                    <button>is present</button>
+                                                    <button>is not present</button>
+                                                    <button>[</button>
+                                                    <button>]</button>
+                                                </div>
+                                                <textarea style='width:100%;height:60%' class='textrule'></textarea>
+                                                <div class='isrulevalid'>Definition is empty</div>
+                                            </div>                                        
+                                        </div>
+                                    </div>
+                                    <div class="logicalform">
+                                        <div style="margin:20px" class="ruleTemplate">
+                                            <p style="margin:10px">Match 
+                                                <select class="anyall" style='width:60px'>
+                                                    <option>All</option>
+                                                    <option>Any</option>
+                                                </select>
+                                                of the following conditions:					
+                                                <button class="condition" >Add condition</button>					
+                                                <button class="groupcondition" style= 'background-color:grey;border-color:grey'>Add group of conditions</button>
+                                            </p>									
+                                        </div>
+                                    </div>                                    
+                                </div>
+							</div>
+						</div>
+						<div class="addAnother" style="margin:10px;display:none">
+							<button style='background-color:blue;border-color:blue;color:white'>Add another subcategory</button>
+						</div>
+						<div align="right" style="margin:10px">
+							<button>Save</button>
+						</div>						
+					</div> <!--End of Add Rule-->					
+				</div>
+				<div id="tab-2" class="tab-content">	
+					<div style='width:100%; position:relative;height:100%'>
+						<div style='position:absolute;left:0%;margin:10px;border-right:2px solid black;height:100%;width:15%'>
+							<input type="text" style="width:90%"/>
+							<div style='margin:10px'>
+								<p style='cursor:pointer'>Anemia</p>
+								<p style='cursor:pointer'>Pancytopenia</p>
+							</div>
+						</div>
+						<div style='position:absolute;left:15%;width:85%;margin:10px;'>
+						<div id="editrule">
+							<div id="namecomponent">
+								<span>Comorbidity Name: <input type="text" id="rulename"/></span>
+								<span style='display:none;color:red'>Water</span>
+							</div>
+							<div id="preselectcomponent">
+								<div class = "preselect">
+									<h2><a href = "#">Preselect Lab Values for the Rule</a></h2>
+									<br/>
+									<div style="margin:20px">								
+										<select id = "values" style = "margin:10px;width: 100%" class="multipreselect" multiple="multiple">
+										</select> 
+									</div>
+								</div>
+							</div>
+							<div id="categorycomponent">
+								<h4><input id="hassubcategory" type="checkbox"/>Does "<span id="declaredrule"></span>" have subcategories?</h4>
+							</div>
+							<div id = "ruleconditioncomponent">
+								<div class = "ruleconditions">
+									<h2>Conditions for : <input class="definition" type = 'text'/></h2>
+									<div style="margin:20px" class="ruleTemplate">
+										<p style="margin:10px">Match 
+											<select class="anyall" style='width:60px'>
+												<option>All</option>
+												<option>Any</option>
+											</select>
+											of the following conditions:							
+											<button class="condition" >Add condition</button>								
+											<button class="groupcondition" style='background-color:grey;border-color:grey'>Add group of conditions</button>
+										</p>									
+									</div>
+								</div>
+							</div>
+							<div class="addAnother" style="margin:10px;display:none">
+								<button style='background-color:blue;border-color:blue;color:white'>Add another subcategory</button>
+							</div>
+							<div align="right" style="margin:10px">
+								<button>Save</button>
+							</div>
+						</div> <!--End of Edit Rule-->					
+					</div>						
+				</div>
+			</div>			
+		</div>		
+	</body>
+</html>

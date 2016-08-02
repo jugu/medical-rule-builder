@@ -1,0 +1,70 @@
+body {
+	font-family: arial
+}
+
+input[type=text] {
+	height:30px;
+	width:300px;
+	font-size:18px;
+	font-weight:bold;
+}
+.tabs-menu {
+    height: 30px;
+    margin-bottom:0px;
+	padding-left:0px;
+    clear: both;
+}
+
+.tabs-menu li {
+	list-style-type: none;
+    height: 30px;
+    line-height: 30px;
+    float: left;
+	color: black;
+    margin-right: 10px;    
+	background-color: #f6f6f6;
+    border-top: 1px solid #d4d4d1;
+    border-right: 1px solid #d4d4d1;
+    border-left: 1px solid #d4d4d1;
+}
+
+.tabs-menu li.current {
+    position: relative;
+	color: white;
+    background-color: #007fff;
+    border-bottom: 1px solid #fff;
+    z-index: 5;
+}
+
+.tabs-menu li a {
+    padding: 10px;
+    /*text-transform: uppercase;*/
+    text-decoration: none; 
+}
+
+.tabs-menu .current a {
+    color: white;
+}
+
+.tab {
+    border: 1px solid #d4d4d1;
+    background-color: #fff;
+    /*float: left;*/
+    margin-bottom: 20px;
+    width: auto;
+}
+
+.tab-content {
+    width: 100%;
+    /*padding: 20px;*/
+    display: none;
+}
+
+#tab-1 {
+ display: block;   
+}
+
+#declaredrule {
+	font-weight: bold;
+	font-size:20px;
+}

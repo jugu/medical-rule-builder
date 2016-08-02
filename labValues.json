@@ -1,0 +1,27 @@
+{"labValues": [
+  {
+    "id": "minHb",
+    "name": "Minimum Hemoglobin"
+  },
+  {
+    "id": "minHc",
+    "name": "Minimum Hematocrit"
+  },
+  {
+    "id": "prevMinHb",
+    "name": "Previous Minimum Hemoglobin"
+  },
+  {
+    "id": "prevMinHc",
+    "name": "Previous Minimum Hematocrit"
+  },
+  {
+    "id": "lowHb",
+    "name": "low Hemoglobin standard"
+  },
+  {
+    "id": "lowHc",
+    "name": "low Hematocrit standard"
+  }
+  
+]}
