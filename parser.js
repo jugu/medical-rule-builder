@@ -52,6 +52,15 @@ var parse = function (tokens) {
 				right: expression(rbp)
 			};
 		});
+	},
+    nofix = function (id, lbp, rbp, led) {
+		rbp = rbp || lbp;
+		symbol(id, null, lbp, led || function (left) {
+			return {
+				type: id,
+				left: left
+			};
+		});
 	};
 
 
@@ -85,19 +94,20 @@ var parse = function (tokens) {
 
 	symbol("(", function () {
 		value = expression(2);
+        value.group = 'true';
 		if (token().type !== ")") throw "Expected closing parenthesis ')'";
 		advance();
 		return value;
 	});
-
-    infix("&&", 8);
-    infix("||", 8);
+    
     infix(">", 8);
     infix("<", 8);
     infix("<=", 8);
     infix(">=", 8);
     infix("==", 8);
     infix("!=", 8);
+    nofix("!=-1", 8);
+    nofix("==-1", 8);
 	prefix("-", 7);    
 	infix("^", 6, 5);
 	infix("*", 4);
@@ -105,6 +115,8 @@ var parse = function (tokens) {
 	infix("%", 4);
 	infix("+", 3);
 	infix("-", 3);
+    infix("&&", 3);
+    infix("||", 3);
 
 	infix("=", 1, 2, function (left) {
 		if (left.type === "call") {

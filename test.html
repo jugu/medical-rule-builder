@@ -108,7 +108,7 @@
                     <textarea id="variables">
  {
 "minHb":10, "minHc":40,
-"prevMinHb":90, "prevMinHc":90,
+"prevMinHb":-1, "prevMinHc":-1,
 "lowHb":13.5, "lowHc":40,
 "temperature": 60, "minwbc": 10,
 "minrbc": 20, "minplt": 20,
@@ -126,7 +126,7 @@
     {"Anemia":[
                 { "Normal": "( ( minHb > lowHb ) && ( minHc > lowHc ) )"},
                 { "Acute": "( ( ( minHb < lowHb ) || ( minHc < lowHc ) ) && ( ( prevMinHb > lowHb ) && ( prevMinHc > lowHc ) ) )"},
-                { "Anemic": "( ( ( minHb < lowHb ) || ( minHc < lowHc ) ) && ( ( prevMinHb == -1 ) && ( prevMinHc == -1 ) ) )"},
+                { "Anemic": "( ( ( minHb < lowHb ) || ( minHc < lowHc ) ) && ( ( prevMinHb ==-1 ) && ( prevMinHc ==-1 ) ) )"},
                 { "Chronic": "( ( ( minHb < lowHb ) || ( minHc < lowHc ) ) && ( ( prevMinHb < lowHb ) || ( prevMinHc < lowHc ) ) )"}
               ]},                                                                                              
                                                                                               

@@ -8,6 +8,8 @@ var evaluate = function (parseTree, vars) {
         ">=": function (a, b) { return a >= b},
         "<=": function (a, b) { return a <= b},
         "==": function (a, b) { return a == b},
+        "==-1": function (a) { return a == -1},
+        "!=-1": function (a) { return a != -1},
 		"+": function (a, b) { return a + b; },
 		"-": function (a, b) {
 			if (typeof b === "undefined") return -a;
@@ -54,6 +56,9 @@ var evaluate = function (parseTree, vars) {
 	};
 
 	var parseNode = function (node) {
+        if (!node) {
+            return null;
+        }
 		if (operators[node.type]) {
 			if (node.left) return operators[node.type](parseNode(node.left), parseNode(node.right));
 			return operators[node.type](parseNode(node.right));

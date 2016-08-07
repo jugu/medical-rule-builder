@@ -1,5 +1,150 @@
+.addAnother {
+    margin:10px;
+    display:none;
+}
+.addAnother button {
+    background-color:blue;
+    border-color:blue;
+    color:white
+}
+
 body {
 	font-family: arial
+}
+
+button {
+    background-color:#5cb85c;
+    color:white;
+    display: inline-block;
+    padding: 2px 2px;
+    margin-bottom: 0;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.5;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    -ms-touch-action: manipulation;
+    touch-action: manipulation;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    background-image: none;
+    border: 1px solid #5cb85c;
+    border-radius: 4px;
+}
+button.removecategory {
+    background-color:red;
+    border-color:red
+}
+
+button.groupcondition {
+    background-color:grey;
+    border-color:grey;
+}
+
+button.removegroupcondition {
+    background-color:red;
+    border-color:red;
+}
+.categorycomponent{
+    margin: 10px;
+}
+div.vieweditparent {
+    width:100%; 
+    position:relative;
+    height:90%;
+}
+
+div.vieweditparent .vieweditleft {
+    position:absolute;
+    left:0%;
+    margin:10px;
+    border-right:2px solid black;
+    height:100%;
+    width:15%;
+}
+
+div.vieweditparent .vieweditright {
+    position:absolute;
+    left:15%;
+    width:80%;
+    margin:10px;
+}
+div.acondition .lhs {
+    /*width:20%;*/
+}
+div.acondition .rhs {
+    /*width:20%;*/
+}
+#declaredrule {
+	font-weight: bold;
+	font-size:20px;
+}
+.isrulevalid {
+    margin:5px;
+    text-align: right;
+    color:red;
+}
+.namecomponent {
+    margin:20px;
+}
+.multipreselect {
+    margin:10px;
+    width: 60%;
+}
+.preselect {
+    margin:10px;
+    border:1px solid #5eaaeb;
+}
+.preselectcomponent {
+}
+.preselect h2{      
+    margin:0px;
+    font-size: 20px;
+    padding-bottom : 5px;
+    background-color: #337ab7;
+    color: white;
+    cursor:pointer;
+    border: 1px solid #337ab7;
+    border: 1px solid #337ab7;
+}			          
+.preselect h2 a{
+    margin: 10px;
+    color: inherit;
+    text-decoration: none;               
+}               			
+.ruleTemplate {
+    margin-top:5px;
+    margin-left:20px;
+    margin-right:20px;
+    margin-bottom:20px;
+    border-left: 5px solid #dff0d8;
+    border-top: 1px solid #dff0d8;
+}
+
+.ruleTemplate > p {
+    margin-bottom:10px;margin-left:10px;margin-right:10px;
+}
+.ruleconditions {
+    margin: 10px;
+    border:1px solid #dff0d8;
+}			
+.ruleconditions h2{      
+    margin:0px;
+    padding:5px;
+    font-size: 20px;
+    background-color: #dff0d8;
+    color: #3c763d;
+    cursor: pointer;
+    border: 1px solid #dff0d8;
+    border: 1px solid #dff0d8;
+}						
+select {
+    height: 30px;
+    font-size:20px;
 }
 
 input[type=text] {
@@ -64,7 +209,15 @@ input[type=text] {
  display: block;   
 }
 
-#declaredrule {
-	font-weight: bold;
-	font-size:20px;
+.textform {
+    margin-top:5px;
+    margin-left:20px;
+    margin-bottom:5px;
+}            
+.textrule {
+    border:2px solid red;
+    font-size:20px; 
+    font-weight:bold;
+    overflow-y:auto;
+    overflow-x:hidden;
 }

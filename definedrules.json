@@ -1,0 +1,9 @@
+[
+    {"Anemia":[
+        { "Normal": " minHb > lowHb && minHc > lowHc"},
+        { "Acute": " ( ( ( minHb < lowHb ) || ( minHc < lowHc ) ) && ( ( prevMinHb > lowHb ) && ( prevMinHc > lowHc ) ) )"},
+        { "Anemic": "(  minHb < lowHb  ||  minHc < lowHc ) && (  prevMinHb ==-1  &&  prevMinHc ==-1  ) "},
+        { "Chronic": "(  minHb < lowHb  ||  minHc < lowHc  ) && (  prevMinHb < lowHb  ||  prevMinHc < lowHc  ) "}
+        ]
+    }
+]

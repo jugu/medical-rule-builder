@@ -15,6 +15,8 @@ var lexer = function (input) {
     var t_MINUS = /\-$/; operator_tokens.push(t_MINUS);
     var t_DIV = /\//; operator_tokens.push(t_DIV);
     var t_MUL = /\*/; operator_tokens.push(t_MUL);
+    var t_PRESENT = /!=-1/; operator_tokens.push(t_PRESENT);
+    var t_NOTPRESENT = /==-1/; operator_tokens.push(t_NOTPRESENT);
         
     
     var t_ID = /^[a-zA-Z]\w*$/;
@@ -44,7 +46,7 @@ var lexer = function (input) {
     var isIdentifier = function (str) {
         return t_ID.test(str);
     }
-    var wordArr = input.replace(/^\s+|\s+$/gm,"").split(" ");
+    var wordArr = input.replace(/^\s+|\s+$/gm,"").split(/\s+/);
     var tokens = [];
     
     var addToken = function (type, value) {
@@ -56,7 +58,15 @@ var lexer = function (input) {
     
     wordArr.forEach(function (word){
         if (isOperator(word)) {
-			addToken(word);
+            /*if (word === '==-1') {
+                addToken("==");   
+                addToken("number", -1);
+            } else if (word === '!=-1') {
+                addToken("!=");   
+                addToken("number", -1);
+            } else */{
+                addToken(word);
+            }			
         }
         else if (isNumber(word)) {
             var num = parseFloat(word);
@@ -68,9 +78,30 @@ var lexer = function (input) {
         else if (isRule(word)){
             addToken("rule", word);
         }
-        else
+        else {
+            console.log(word);
             throw "unrecognized token"
+        }
     });
 	addToken("(end)");
 	return tokens;
 };
+
+var sampleJSON = [
+                            {"Anemia":[
+                                        { "Normal": "( ( minHb > lowHb ) && ( minHc > lowHc ) )"},
+                                        { "Acute": "( ( ( minHb < lowHb ) || ( minHc < lowHc ) ) && ( ( prevMinHb > lowHb ) && ( prevMinHc > lowHc ) ) )"},
+                                        { "Anemic": "( ( ( minHb < lowHb ) || ( minHc < lowHc ) ) && ( ( prevMinHb ==-1 ) && ( prevMinHc ==-1 ) ) )"},
+                                        { "Chronic": "( ( ( minHb < lowHb ) || ( minHc < lowHc ) ) && ( ( prevMinHb < lowHb ) || ( prevMinHc < lowHc ) ) )"}
+                                      ]
+                            }
+                        ];
+        var generateTemplateFromText = function(ruleObj) {
+            for (key in ruleObj) {
+                var item = Object.prototype.toString.call( ruleObj[key] );// === '[object Array]' 
+                console.log(key, lexer(item));
+            }            
+        };
+            
+        /*for (var i = 0; i < sampleJSON.length; i++)
+            generateTemplateFromText(sampleJSON[i]);*/

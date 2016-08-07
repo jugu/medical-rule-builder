@@ -1,27 +1,343 @@
-{"labValues": [
-  {
-    "id": "minHb",
-    "name": "Minimum Hemoglobin"
-  },
-  {
-    "id": "minHc",
-    "name": "Minimum Hematocrit"
-  },
-  {
-    "id": "prevMinHb",
-    "name": "Previous Minimum Hemoglobin"
-  },
-  {
-    "id": "prevMinHc",
-    "name": "Previous Minimum Hematocrit"
-  },
-  {
-    "id": "lowHb",
-    "name": "low Hemoglobin standard"
-  },
-  {
-    "id": "lowHc",
-    "name": "low Hematocrit standard"
-  }
-  
-]}
+[
+		  {
+			"id": "minHb",
+			"name": "Minimum Hemoglobin",
+            "pairwith" : "lowHb" 
+		  },
+		  {
+			"id": "minHc",
+			"name": "Minimum Hematocrit",
+            "pairwith" : "lowHc"
+		  },
+		  {
+			"id": "prevMinHb",
+			"name": "Previous Minimum Hemoglobin",
+            "pairwith" : "lowHb"
+		  },
+		  {
+			"id": "prevMinHc",
+			"name": "Previous Minimum Hematocrit",
+            "pairwith" : "lowHc"
+		  },
+		  {
+			"id": "lowHb",
+			"name": "Low Hemoglobin standard",
+            "pairwith" : ""            
+		  },
+		  {
+			"id": "lowHc",
+			"name": "Low Hematocrit standard",
+            "pairwith" : ""
+		  },
+		  {
+			"id": "minbicarbonate",
+			"name": "Minimum Serum Bicarbonate",
+            "pairwith" : ""
+		  },
+          {
+			"id": "maxbicarbonate",
+			"name": "Maximum Serum Bicarbonate",
+            "pairwith" : ""
+		  },
+          {
+			"id": "minpotassium",
+			"name": "Minimum Potassium",
+            "pairwith" : "lowpotassium"
+		  },
+          {
+			"id": "lowpotassium",
+			"name": "Normal Low Potassium Standard",
+            "pairwith" : ""
+		  },
+          {
+			"id": "maxpotassium",
+			"name": "Maximum Potassium",
+            "pairwith" : "hipotassium"
+		  },
+          {
+			"id": "hipotassium",
+			"name": "Normal High Potassium Standard",
+            "pairwith" : ""
+		  },
+          {
+			"id": "minsodium",
+			"name": "Minimum Sodium",
+            "pairwith" : "lowsodium"
+		  },
+          {
+			"id": "lowsodium",
+			"name": "Normal Low Sodium Standard",
+            "pairwith" : ""
+		  },
+          {
+			"id": "maxsodium",
+			"name": "Maximum Sodium",
+            "pairwith" : "hisodium"
+		  },
+          {
+			"id": "hisodium",
+			"name": "Normal High Sodium Standard",
+            "pairwith" : ""
+		  },
+          {
+			"id": "mincalcium",
+			"name": "Minimum Calcium",
+            "pairwith" : "lowcalcium"
+		  },
+          {
+			"id": "lowcalcium",
+			"name": "Normal Low Calcium Standard",
+            "pairwith" : ""
+		  },
+          {
+			"id": "maxcalcium",
+			"name": "Maximum Calcium",
+            "pairwith" : "hicalcium"
+		  },
+          {
+			"id": "hicalcium",
+			"name": "Normal High Calcium Standard",
+            "pairwith" : ""
+		  },
+          {
+			"id": "minphosphorus",
+			"name": "Minimum Phosphorus",
+            "pairwith" : "lowphosphorus"
+		  },
+          {
+			"id": "lowphosphorus",
+			"name": "Normal Low Phosphorus Standard",
+            "pairwith" : ""
+		  },
+          {
+			"id": "maxphosphorus",
+			"name": "Maximum Phosphorus",
+            "pairwith" : "hiphosphorus"
+		  },
+          {
+			"id": "hiphosphorus",
+			"name": "Normal High Phosphorus Standard",
+            "pairwith" : ""
+		  },
+          {
+			"id": "minmagnesium",
+			"name": "Minimum Magnesium",
+            "pairwith" : "lowmagnesium"
+		  },
+          {
+			"id": "lowmagnesium",
+			"name": "Normal Low Magnesium Standard",
+            "pairwith" : ""
+		  },
+          {
+			"id": "maxmagnesium",
+			"name": "Maximum Magnesium",
+            "pairwith" : "himagnesium"
+		  },
+          {
+			"id": "himagnesium",
+			"name": "Normal High Magnesium Standard",
+            "pairwith" : ""
+		  },
+          {
+            "id" : "minglucose",
+            "name" : "Minimum Glucose",
+            "pairwith" : "lowglucose"
+          },
+          {
+            "id" : "lowglucose",
+            "name" : "Normal Low Glucose Standard",
+            "pairwith" : ""              
+          },
+          {
+            "id" : "maxglucose",
+            "name" : "Maximum Glucose",
+            "pairwith" : "higlucose"
+          },
+          {
+            "id" : "higlucose",
+            "name" : "Normal High Glucose Standard",
+            "pairwith" : ""
+          },
+          {
+            "id" : "minneutrophil",
+            "name" : "Minimum Neutrophil",
+            "pairwith" : "lowneutrophil"
+          },
+          {
+            "id" : "lowneutrophil",
+            "name" : "Normal Low Neutrophil Standard",
+            "pairwith" : ""
+          },
+          {
+            "id" : "maxcholestrol",
+            "name" : "Maximum Cholesterol",
+            "pairwith" : ""
+          },
+          {
+            "id" : "sysBP",
+            "name" : "Systolic Blood Pressure",
+            "pairwith" : ""
+          },
+          {
+            "id" : "diasBP",
+            "name" : "Diastolic Blood Pressure",
+            "pairwith" : ""
+          },
+          {
+            "id" : "minPulseOxi",
+            "name" : "Minimum Pulse Oximetry",
+            "pairwith" : ""
+          },
+          {
+            "id" : "maxCreatinine",
+            "name" : "Maximum Creatinine",
+            "pairwith" : ""
+          },
+          {
+            "id" : "prevMaxCreatinine",
+            "name" : "Previous Maximum Creatinine",
+            "pairwith" : ""
+          },
+          {
+            "id" : "maxGFR",
+            "name" : "Maximum GFR",
+            "pairwith" : ""
+          },
+          {
+            "id" : "maxLacticAcid",
+            "name" : "Maximum Lactic Acid",
+            "pairwith" : "hiLacticAcid"
+          },
+          {
+            "id" : "hiLacticAcid",
+            "name" : "Lactic Acid High",
+            "pairwith" : ""
+          },
+          {
+            "id" : "bmi",
+            "name" : "Body Mass Index",
+            "pairwith" : ""
+          },
+          {
+            "id" : "minWBC", 
+            "name" : "Minimum WBC count",
+            "pairwith" : "lowWBC"
+          },
+          {
+            "id" : "lowWBC", 
+            "name" : "Normal low WBC count",
+            "pairwith" : ""
+          },
+          {
+            "id" : "minRBC", 
+            "name" : "Minimum RBC count",
+            "pairwith" : "lowRBC"
+          },
+          {
+            "id" : "lowRBC", 
+            "name" : "Normal low RBC count",
+            "pairwith" : ""
+          },
+          {
+            "id" : "minPLT", 
+            "name" : "Minimum PLT count",
+            "pairwith" : "lowPLT"
+          },
+          {
+            "id" : "lowPLT", 
+            "name" : "Normal low PLT count",
+            "pairwith" : ""
+          },
+          {
+            "id" : "minPO2", 
+            "name" : "Minimum PO2",
+            "pairwith" : ""
+          },
+          {
+            "id" : "maxPCO2", 
+            "name" : "Maximum PCO2",
+            "pairwith" : ""
+          },
+          {
+            "id" : "maxETCO2", 
+            "name" : "Maximum ETCO2",
+            "pairwith" : ""
+          },
+          {
+            "id" : "prevMaxETCO2", 
+            "name" : "Previous Maximum ETCO2",
+            "pairwith" : ""
+          },
+          {
+            "id" : "maxCardiacTroponin",
+            "name" : "maximum Cardiac Troponin",
+            "pairwith" : ""
+          },
+          {
+            "id" : "hiCardiacTroponin",
+            "name" : "Normal High Cardiac Troponin Standard",
+            "pairwith" : ""
+          },
+          {
+            "id" : "maxHR",
+            "name" : "Maximum Heart Rate",
+            "pairwith" : ""
+          },
+          {
+            "id" : "maxRespRate",
+            "name" : "Maximum Respiratory Rate",
+            "pairwith" : ""
+          },
+          {
+            "id" : "maxBands",
+            "name" : "Maximum Bands (%)",
+            "pairwith" : ""
+          },
+          {
+            "id" : "minTemp",
+            "name" : "Minimum Temperature",
+            "pairwith" : ""
+          },
+          {
+            "id" : "maxTemp",
+            "name" : "Maximum Temperature",
+            "pairwith" : ""
+          },
+          {
+            "id" : "meanArtPressure",
+            "name" : "Mean Arterial Pressure",
+            "pairwith" : ""
+          },
+          {
+            "id" : "maxTotBil",
+            "name" : "Maximum Total Bilirubin",
+            "pairwith" : ""
+          },
+          {
+            "id" : "maxINR",
+            "name" : "Maximum INR",
+            "pairwith" : ""
+          },
+          {
+            "id" : "maxPTT",
+            "name" : "Maximum PTT",
+            "pairwith" : ""
+          },
+          {
+            "id" : "maxUrWBC",
+            "name" : "Maximum Urinalysis WBC",
+            "pairwith" : ""
+          },
+          {
+            "id" : "urnNitrite",
+            "name" : "Urinalysis Nitrite",
+            "pairwith" : ""
+          },
+          {
+            "id" : "urnLeucEster",
+            "name" : "Urinalysis Leukocyte Esterase",
+            "pairwith" : ""
+          }
+            
+		]
