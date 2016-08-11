@@ -2,6 +2,14 @@
 
 Demo available at https://jugu.github.io/medical-rule-builder/
 
+To run the code locally
+
+1. Install Node (https://nodejs.org/en/)
+2. Run the command: node ruleserver.js
+3. Open the application in browser at: <b>http://localhost:3000/medical-rule-builder/index.html</b> (port may vary)
+
+(The only libraries/plugins used are JQuery and select2)
+
 
 This is an online rule builder tool. Currently customized for dynamically creating/editing rules for illnesses/diseases. 
 
