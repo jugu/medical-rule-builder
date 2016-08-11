@@ -1,4 +1,6 @@
-//var exports = module.exports = {}
+/**
+ * @author Jugu Dannie Sundar <jugu [dot] 87 [at] gmail [dot] com>
+ */
 
 var parse = function (tokens) {
 	var symbols = {},
@@ -99,22 +101,22 @@ var parse = function (tokens) {
 		advance();
 		return value;
 	});
-    
-    infix(">", 8);
-    infix("<", 8);
-    infix("<=", 8);
-    infix(">=", 8);
-    infix("==", 8);
-    infix("!=", 8);
-    nofix("!=-1", 8);
-    nofix("==-1", 8);
-	prefix("-", 7);    
-	infix("^", 6, 5);
-	infix("*", 4);
-	infix("/", 4);
-	infix("%", 4);
-	infix("+", 3);
-	infix("-", 3);
+        
+	prefix("-", 8);    
+	infix("^", 7, 7);
+	infix("*", 6);
+	infix("/", 6);
+	infix("%", 6);
+	infix("+", 5);
+	infix("-", 5);
+    infix(">", 4);
+    infix("<", 4);
+    infix("<=", 4);
+    infix(">=", 4);
+    infix("==", 4);
+    infix("!=", 4);
+    nofix("!=-1", 4);
+    nofix("==-1", 4);
     infix("&&", 3);
     infix("||", 3);
 

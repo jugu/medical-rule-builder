@@ -1,10 +1,10 @@
 <html>
     <head>
-        <link href="rule.css" type="text/css" rel="stylesheet"/>
-        <script type="text/javascript" src="lexer.js"></script>
-        <script type="text/javascript" src="parser.js"></script>
-        <script type="text/javascript" src="interpreter.js"></script>        
-        <script type="text/javascript" src="evaluator.js"></script>        
+        <link href="rule.interpreter.css" type="text/css" rel="stylesheet"/>
+        <script type="text/javascript" src="rule.interpreter.lexer.js"></script>
+        <script type="text/javascript" src="rule.interpreter.parser.js"></script>
+        <script type="text/javascript" src="rule.interpreter.interpreter.js"></script>        
+        <script type="text/javascript" src="rule.interpreter.evaluator.js"></script>        
         <script   src="https://code.jquery.com/jquery-1.12.4.min.js"   integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="   crossorigin="anonymous"></script>
         <script>
                 $(document).ready(function(){
@@ -107,9 +107,9 @@
                     Variables<br/>
                     <textarea id="variables">
  {
-"minHb":10, "minHc":40,
+"minHb":40, "minHc":40,
 "prevMinHb":-1, "prevMinHc":-1,
-"lowHb":13.5, "lowHc":40,
+"lowHb":20, "lowHc":40,
 "temperature": 60, "minwbc": 10,
 "minrbc": 20, "minplt": 20,
 "wbclow": 50, "rbclow": 60,
@@ -124,7 +124,7 @@
                 <textarea id="rules">
 [
     {"Anemia":[
-                { "Normal": "( ( minHb > lowHb ) && ( minHc > lowHc ) )"},
+                { "Normal": " minHb > 2.5 * lowHb  &&  minHc > lowHc"},
                 { "Acute": "( ( ( minHb < lowHb ) || ( minHc < lowHc ) ) && ( ( prevMinHb > lowHb ) && ( prevMinHc > lowHc ) ) )"},
                 { "Anemic": "( ( ( minHb < lowHb ) || ( minHc < lowHc ) ) && ( ( prevMinHb ==-1 ) && ( prevMinHc ==-1 ) ) )"},
                 { "Chronic": "( ( ( minHb < lowHb ) || ( minHc < lowHc ) ) && ( ( prevMinHb < lowHb ) || ( prevMinHc < lowHc ) ) )"}

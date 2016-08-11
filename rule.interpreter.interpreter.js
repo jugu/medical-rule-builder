@@ -1,9 +1,11 @@
-//var rule = `( ( minHb > lowHb ) && ( minHc > lowHc ) )`;
+/**
+ * @author Jugu Dannie Sundar <jugu [dot] 87 [at] gmail [dot] com>
+ */
 
 function parseRule(rule, variables)
 {        
     var tokens = lexer(rule);
-    console.log(tokens);
+    //console.log(tokens);
     var parseTree = parse(tokens);
     //console.log(parseTree);
     var output = evaluate(parseTree, variables);

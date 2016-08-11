@@ -1,3 +1,6 @@
+/**
+ * @author Jugu Dannie Sundar <jugu [dot] 87 [at] gmail [dot] com>
+ */
 .addAnother {
     margin:10px;
     display:none;
@@ -35,35 +38,170 @@ button {
     border: 1px solid #5cb85c;
     border-radius: 4px;
 }
+
+button.clear {
+    background-color : brown;
+    color : white;
+    border-color : brown;
+}
+button.export {
+    background-color : brown;
+    color : white;
+    border-color : brown;
+}
+button.groupcondition {
+    padding:1px;
+    margin:0px;
+    background-color:grey;
+    border-color:grey;
+}
 button.removecategory {
     background-color:red;
     border-color:red
 }
-
-button.groupcondition {
-    background-color:grey;
-    border-color:grey;
-}
-
 button.removegroupcondition {
     background-color:red;
     border-color:red;
 }
+button.reset {
+    border-color: indigo;
+    color: white;
+    background-color: indigo;
+}
 .categorycomponent{
     margin: 10px;
 }
+
+div.acondition {
+    padding: 10px;
+    margin: 10px;
+    background-color:white;
+}
+div.acondition .lhs {
+    /*width:20%;*/
+}
+div.acondition input {
+    width:50px;
+    margin-left:5px; 
+    margin-right: 5px
+}
+div.acondition .rhs {
+    /*width:20%;*/
+}
+div.associationclass {
+    margin-left: -50px;
+    color:dodgerblue;
+    display:none;
+}
+div.associationgroupclass {
+    margin-left:-50px;
+    color:dodgerblue;
+    position:absolute;
+    top:45%;
+    display:none;
+}
+div.definedrules {
+    height:auto;
+}
+div.definedrules p {
+    border-left:1px solid;
+    border-top:1px solid;
+    border-bottom:1px solid;
+    height:30px;
+    margin:0px;
+    cursor: pointer;
+    font-size: 16px;
+    font-family: verdana;
+}
+
+div.definedrules p:hover {
+    background-color: chocolate;
+   /* color: white;*/
+}
+
+div.groupclass {
+    margin-top:10px;
+    margin-left:10px;
+}
+div.helpnote {
+    color: grey;
+}
+div.modalclose {    
+    color: #aaaaaa;
+    text-align:right;
+    margin:10px;
+    font-size: 28px;
+    font-weight: bold;
+}
+div.modalclose:hover,
+div.modalclose:focus {
+    color: #000;
+    cursor: pointer;
+}
+div.modalTemplate {
+    display:none;
+    position:fixed;    
+    background-color: white;
+    top:30%;
+    left:25%;
+    width:50%;
+    height:100px;
+    z-index:  5;
+}
+div#modalmessage {
+    margin:10px;
+}
+
+div.ruleTemplate {
+    position:relative;
+    margin-top:5px;
+    margin-bottom:30px;
+    margin-left:50px;
+    margin-right:20px;    
+    background-color:blanchedalmond;
+    border-left: 5px solid brown;
+    border-top: 1px solid brown;
+    border-right: 1px solid brown;
+    border-bottom: 1px solid brown;
+}
+
+div.ruleTemplate p.conditionclass {
+    margin-top: 10px;
+    margin-bottom:30px;
+    margin-left:50px;
+    margin-right:10px;
+    border-left:5px solid brown;
+}
+div.showlogicalform {
+    display: none;
+    cursor: pointer;
+    margin-top:10px;
+    margin-bottom:10px;
+    margin-left:50px;
+    margin-right:20px;
+    font-size: 20px;
+    text-align: center;    
+}
+div.showlogicalform:hover,
+div.showlogicalform:focus{
+    /*background-color: sandybrown;*/
+    color:blueviolet;
+    font-weight: bold;
+    text-decoration: underline;
+}
 div.vieweditparent {
     width:100%; 
+    height: 90%;
     position:relative;
-    height:90%;
 }
 
 div.vieweditparent .vieweditleft {
     position:absolute;
     left:0%;
-    margin:10px;
+    margin-top:10px;
+    height: 98%;
+    overflow-y: auto;
     border-right:2px solid black;
-    height:100%;
     width:15%;
 }
 
@@ -73,15 +211,13 @@ div.vieweditparent .vieweditright {
     width:80%;
     margin:10px;
 }
-div.acondition .lhs {
-    /*width:20%;*/
-}
-div.acondition .rhs {
-    /*width:20%;*/
-}
 #declaredrule {
 	font-weight: bold;
 	font-size:20px;
+}
+.nameerror {
+    color: red;
+    display: none;
 }
 .isrulevalid {
     margin:5px;
@@ -94,6 +230,10 @@ div.acondition .rhs {
 .multipreselect {
     margin:10px;
     width: 60%;
+}
+p.selected_edit_rule {
+    background-color: chocolate;
+    color:white;
 }
 .preselect {
     margin:10px;
@@ -111,23 +251,11 @@ div.acondition .rhs {
     border: 1px solid #337ab7;
     border: 1px solid #337ab7;
 }			          
-.preselect h2 a{
+.preselect h2 a {
     margin: 10px;
     color: inherit;
     text-decoration: none;               
 }               			
-.ruleTemplate {
-    margin-top:5px;
-    margin-left:20px;
-    margin-right:20px;
-    margin-bottom:20px;
-    border-left: 5px solid #dff0d8;
-    border-top: 1px solid #dff0d8;
-}
-
-.ruleTemplate > p {
-    margin-bottom:10px;margin-left:10px;margin-right:10px;
-}
 .ruleconditions {
     margin: 10px;
     border:1px solid #dff0d8;
@@ -144,6 +272,7 @@ div.acondition .rhs {
 }						
 select {
     height: 30px;
+    width: 20%;
     font-size:20px;
 }
 
@@ -152,6 +281,10 @@ input[type=text] {
 	width:300px;
 	font-size:18px;
 	font-weight:bold;
+}
+.successdiv {
+    margin-top:10px;
+    background-color:paleturquoise;
 }
 .tabs-menu {
     height: 30px;

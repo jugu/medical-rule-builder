@@ -1,3 +1,6 @@
+/**
+ * @author Jugu Dannie Sundar <jugu [dot] 87 [at] gmail [dot] com>
+ */
 var evaluate = function (parseTree, vars) {
 
 	var operators = {

@@ -1,4 +1,6 @@
-//var exports = module.exports = {}
+/**
+ * @author Jugu Dannie Sundar <jugu [dot] 87 [at] gmail [dot] com>
+ */
 
 var lexer = function (input) {
     var operator_tokens = [];

@@ -1,9 +1,28 @@
 [
-    {"Anemia":[
-        { "Normal": " minHb > lowHb && minHc > lowHc"},
-        { "Acute": " ( ( ( minHb < lowHb ) || ( minHc < lowHc ) ) && ( ( prevMinHb > lowHb ) && ( prevMinHc > lowHc ) ) )"},
-        { "Anemic": "(  minHb < lowHb  ||  minHc < lowHc ) && (  prevMinHb ==-1  &&  prevMinHc ==-1  ) "},
-        { "Chronic": "(  minHb < lowHb  ||  minHc < lowHc  ) && (  prevMinHb < lowHb  ||  prevMinHc < lowHc  ) "}
-        ]
-    }
+    {"Acid base disorder" : [
+            {"Metabolic Acidosis": "minbicarbonate < 18.0"},
+            {"Metabolic Alkalosis": "maxbicarbonate > 30.0"}
+        ]},
+    {"Anemia" : [                
+            { "Acute": "( minHb < lowHb || minHc < lowHc ) && ( prevMinHb > lowHb && prevMinHc > lowHc )"},
+            { "Anemic": "( minHb < lowHb || minHc < lowHc ) && ( prevMinHb ==-1 && prevMinHc ==-1 )"},
+            { "Chronic": "( minHb < lowHb || minHc < lowHc ) && ( prevMinHb < lowHb || prevMinHc < lowHc )"},
+            { "Normal": "minHb > lowHb && minHc > lowHc"}
+        ]},                                                                                              
+    {"HyperCholesterolemia" : "maxcholestrol > 200"},
+    {"Hypertension" : [
+            {"Elevated Blood Pressure" : "sysBP > 140 && diasBP > 90"},
+            {"Hypertension" : "sysBP > 140 && diasBP > 90"}
+        ]},
+    {"Kidney Injury" : [
+            {"Acute" : " maxCreatinine > 1.5 * prevMaxCreatinine || ( maxCreatinine > 1.2 && prevMaxCreatinine <= 1.2 )"},
+            {"Chronic" : "maxCreatinine > 1.2 && prevMaxCreatinine > 1.2"},
+            {"Acute on Chronic" : "maxCreatinine > 1.2 && prevMaxCreatinine > 1.2 && maxCreatinine > 1.5 * prevMaxCreatinine"},
+            {"Not otherwise specified" : "maxCreatinine > 1.2"}
+        ]}, 
+    {"Pancytopenia" : [
+            {"Due to Chemotherapy" : "minWBC < lowWBC && minRBC < lowRBC && minPLT < lowPLT "},
+            {"Due to Drugs" : "minWBC < lowWBC && minRBC < lowRBC && minPLT < lowPLT"},
+            {"Not Otherwise Specified" : "minWBC < lowWBC && minRBC < lowRBC && minPLT < lowPLT"}
+        ]}        
 ]
