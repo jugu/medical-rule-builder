@@ -103,6 +103,7 @@ function postLoadData() {
     var preselectOptions = labValues;
     var firstCategory = true;
     addSubCategory($("#addrule"), firstCategory);
+    $(".rulename").focus();
     organizeOptions(preselectOptions);
 }
 
@@ -166,7 +167,7 @@ function attachEventHandlers() {
                 savedRulesJSON.push(newSavedRules[i]);
             newSavedRules = [];
         }
-    })
+    });
 
     $(".multipreselect").on("select2:select select2:unselect", function (e) {
         //this returns all the selected item
@@ -178,15 +179,25 @@ function attachEventHandlers() {
         organizeOptions(preselectOptions);
     });
 
-    $('.preselect h2').click(function(e) {
-        $('.preselect div').slideToggle('slow');
-        if ($(this).children("span").text() === '+')
-            $(this).children("span").text('-')
+    $('#addrule .preselect h2').click(function(e) {
+        $('#addrule .preselect div').slideToggle('slow');
+        if ($(this).children(".expandcollapse").text() === '+')
+            $(this).children(".expandcollapse").text('-')
         else
-            $(this).children("span").text('+')
+            $(this).children(".expandcollapse").text('+')
         //$(this).toggleClass('active');
         //e.preventDefault();
-    });            
+    });
+    
+    $('#editrule .preselect h2').click(function(e) {
+        $('#editrule .preselect div').slideToggle('slow');
+        if ($(this).children(".expandcollapse").text() === '+')
+            $(this).children(".expandcollapse").text('-')
+        else
+            $(this).children(".expandcollapse").text('+')
+        //$(this).toggleClass('active');
+        //e.preventDefault();
+    });
 
     $(".tabs-menu a").click(function(event) {
         event.preventDefault();
@@ -306,7 +317,7 @@ function attachEventHandlers() {
             }
         } else if ( rhsVal == CONSTANTS.MULTIPLESTRING) {
             if ($(this).next().prop("nodeName") !== 'INPUT') {
-                $("<input type='text' value='0' style='width:50px;margin-left:5px;margin-right:5px'/>").insertAfter($(this));
+                $("<input type='text' value='0' class='multiple'/>").insertAfter($(this));
                 if ($(this).next().next().attr("class") !== 'rhs') {
                     $(this).clone().insertBefore($(this).parent().children().last());
                 }
@@ -437,7 +448,7 @@ function attachEventHandlers() {
 }  // end of attachEventHandlers function
 
 function invokeModal(message, kindOfMessage) {
-    $(".vieweditright").hide();
+    $(".vieweditright #editrule").hide();
     $("div.modalTemplate").show();
     if (kindOfMessage == 'SUCCESS')
         $("div.modalTemplate").addClass("successdiv");
@@ -674,7 +685,7 @@ var generateRuleTemplateFromText = function(ruleObj) {
     var comorbidityName = "";
     var hasSubCategories = false;
     var subCategoriesCount = 0;
-    var subCategories = [];
+    var subCategories = [];    
     for (key in ruleObj) {
         comorbidityName = key;
         subCategories = ruleObj[key];
@@ -772,9 +783,9 @@ function getRuleString(obj) {
             //str += andOr + " [ " + inStr +" ] ";
             interpreterString += andOrIntepreter + " ( " + inStr +" ) ";
         }
-    });                                           
+    });
     return interpreterString;
-}                    
+}            
 
 function addSubCategory(parentDiv, firstCategory)
 {
