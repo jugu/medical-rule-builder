@@ -73,6 +73,10 @@ button.reset {
     color: white;
     background-color: indigo;
 }
+button.updateform {
+    background-color: grey;
+    border-color: grey;
+}
 .categorycomponent{
     margin: 10px;
 }
@@ -94,16 +98,17 @@ div.acondition .rhs {
     /*width:20%;*/
 }
 div.associationclass {
-    margin-left: -50px;
+    margin-left: 20px;
     color:dodgerblue;
-    display:none;
+    /*display:none;*/
 }
 div.associationgroupclass {
-    margin-left:-50px;
+    margin-left:70px;
+    margin-top:-20px;
     color:dodgerblue;
-    position:absolute;
-    top:45%;
-    display:none;
+    /*position:absolute;*/
+    /*top:45%;*/
+    /*display:none;*/
 }
 div.definedrules {
     height:auto;
@@ -130,6 +135,9 @@ div.groupclass {
 }
 div.helpnote {
     color: grey;
+}
+div.labvalueformdiv {
+    cursor:pointer;
 }
 div.modalclose {    
     color: #aaaaaa;
@@ -227,7 +235,6 @@ div.vieweditparent .vieweditright {
 }
 .nameerror {
     color: red;
-    display: none;
 }
 .isrulevalid {
     margin:5px;
@@ -297,6 +304,7 @@ input[type=text] {
 	font-size:18px;
 	font-weight:bold;
 }
+
 .successdiv {
     margin-top:10px;
     background-color:paleturquoise;

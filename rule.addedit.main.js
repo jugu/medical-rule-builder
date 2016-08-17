@@ -10,10 +10,16 @@ var CONSTANTS = {
 
 var config = {
     "showpreselect" : true,
-    "expandpreselect" : false,
+    "addview_expandpreselect" : false,
+    "editview_expandpreselect" : false,
     "editview_showlogicalbydefault" : false,
+    "displayAssociations" : false,
     "defaults" : []
 };
+
+var errorCode = {
+    "rulenameerror" : {"identifier" : ""}
+}
 
 var operators = [
     {"id":"<", "name":"less than"},
@@ -42,12 +48,19 @@ var commonSelectors = [
     {"id":"multiple", "name":"multiple of"}
 ];
 
+var commonSelectorMap = {};
+$.map( commonSelectors, function( obj, index ) {
+    commonSelectorMap[obj.id] =  obj.name;
+});
+
 var labValueMap = {};
 var labValuePairMap = {}; //Pairing value for RHS
 var labValues = [];     
 var savedRulesJSON = [];
 var newSavedRules = []; // tracks newly added rules
 var currentEditComorb = ""; // tracks currently edited comorbidity
+
+var preselectedOptions = [];
 
 
 
@@ -79,18 +92,26 @@ function postLoadData() {
     // bunch of UI operation defaults
     $(".rulename").focus();							
 
-    $(".multipreselect").select2(
-        {width: 'resolve'
-    });	            	
+    $(".multipreselect").select2();    	
 
-    if (!config.expandpreselect) {
-        $('.preselect div').hide();
+    if (!config.addview_expandpreselect) {
+        $('#addrule .preselect div').hide();
+    } else {
+        $('#addrule .expandcollapse').html("-");
     }
+    
+    if (!config.editview_expandpreselect) {
+        $('#editrule .preselect div').hide();
+    }
+    else {
+        $('#editrule .expandcollapse').html("-");
+    }
+    
 
     var $select = $('select.multipreselect');			
     //iterate over the data and append a select option
     $.each(labValues, function(key, val) {
-        $select.append('<option id="' + val.id + '">' + val.name + '</option>');
+        $select.append('<option value="' + val.id + '">' + val.name + '</option>');
     });
 
     $selectN = $(".operator");			
@@ -104,7 +125,7 @@ function postLoadData() {
     var firstCategory = true;
     addSubCategory($("#addrule"), firstCategory);
     $(".rulename").focus();
-    organizeOptions(preselectOptions);
+    organizeOptions(preselectOptions, "#addrule");
 }
 
 function populateDefinedRules(savedRulesJSON) {
@@ -117,6 +138,14 @@ function populateDefinedRules(savedRulesJSON) {
 }        
 // This function is called to attach events to the statically or dynamically created templates for buiding rule
 function attachEventHandlers() {
+    
+    $("#displayassoc").on("change", function() {
+        if ($(this).is(":checked")) {
+            config.displayAssociations = true;
+        }    
+        else
+            config.displayAssociations = false;
+    });
     
     $("#editrule").on("click", ".showlogicalform", function() {
         var text = $(this).html();
@@ -157,9 +186,23 @@ function attachEventHandlers() {
         link.setAttribute('href', 'data:' + mimeType + ';charset=utf-8,' + encodeURIComponent(text));
         link.click();
     });
+    
+    $(".addtab").click(function() {
+        $(".nameerror").html("");
+        var preselectOptions = labValues;
+        var preselectedOptionsInAddArray = $("#addrule .multipreselect").select2().val();
+        if (preselectedOptionsInAddArray != null) {
+            preselectOptions = [];
+            for (var i = 0 ; i < preselectedOptionsInAddArray.length; i++) {
+                preselectOptions.push({"id": preselectedOptionsInAddArray[i], "name" : labValueMap[preselectedOptionsInAddArray[i]]});
+            }
+        }
+       organizeOptions(preselectOptions, "#addrule"); 
+    });
 
     $(".edittab").click(function () {
         $(".definedrules p").removeClass();
+        $(".nameerror").html("");
         $(".vieweditright #editrule").hide();
         if (newSavedRules.length > 0) {
             populateDefinedRules(newSavedRules);
@@ -169,18 +212,18 @@ function attachEventHandlers() {
         }
     });
 
-    $(".multipreselect").on("select2:select select2:unselect", function (e) {
+    $("#addrule .multipreselect").on("select2:select select2:unselect", function (e) {
         //this returns all the selected item
         var preselectOptions = [];                
         var items= $(this).children(":selected");				
         $.each(items, function (index, element){
-            preselectOptions.push({"id":element.id, "name": element.value});
+            preselectOptions.push({"id":element.value, "name": element.text});
         });
-        organizeOptions(preselectOptions);
+        organizeOptions(preselectOptions, "#addrule");
     });
-
+    
     $('#addrule .preselect h2').click(function(e) {
-        $('#addrule .preselect div').slideToggle('slow');
+        $('#addrule .preselect div').slideToggle();
         if ($(this).children(".expandcollapse").text() === '+')
             $(this).children(".expandcollapse").text('-')
         else
@@ -189,8 +232,18 @@ function attachEventHandlers() {
         //e.preventDefault();
     });
     
+    $("#editrule .multipreselect").on("select2:select select2:unselect", function (e) {
+        //this returns all the selected item
+        var preselectOptions = [];                
+        var items= $(this).children(":selected");				
+        $.each(items, function (index, element){
+            preselectOptions.push({"id":element.value, "name": element.text});
+        });
+        organizeOptions(preselectOptions, "#editrule");
+    });
+
     $('#editrule .preselect h2').click(function(e) {
-        $('#editrule .preselect div').slideToggle('slow');
+        $('#editrule .preselect div').slideToggle();
         if ($(this).children(".expandcollapse").text() === '+')
             $(this).children(".expandcollapse").text('-')
         else
@@ -252,36 +305,63 @@ function attachEventHandlers() {
         //populateRuleText();
     });
 
-    $(".ruleconditioncomponent").on("click",".ruleTemplate .groupcondition", function() {			
+    $(".ruleconditioncomponent").on("click",".ruleTemplate .groupcondition", function() {			                        
         var html = $("#subcategoryTemplate .ruleTemplate").clone().wrap('<p/>').parent().html();				
         $(this).parent().parent().append(html); // append html to 'groupclass' div
-        populateRuleText($(this).parents());
+        if (config.displayAssociations) {
+            var anyAll = $(this).siblings(".anyall").val();        
+            addAssociations(anyAll, $(this).parent().parent());
+        }
+        populateRuleText($(this).parents());        
     });			
-
-    $(".ruleconditioncomponent").on("click",".ruleTemplate .condition", function() {			
-        var html = $("#conditionTemplate").html();
-        $(this).parent().next().append(html); // append html to 'conditionclass' div                     
-        var lhsId = $(this).parent().children("div.acondition").last().children(".lhs").children(":selected").attr("value");
+    
+    $(".ruleconditioncomponent").on("click",".ruleTemplate .condition", function() {            
+        var html = $("#conditionTemplate").html();        
+        $(this).parent().next().append(html); // append html to 'conditionclass' div        
+        var lhsId = $(this).parent().next().children("div.acondition").last().children(".lhs").children(":selected").attr("value");
         if (labValuePairMap.hasOwnProperty(lhsId)) {
             var pairWith = labValuePairMap[lhsId];
-            $(this).parent().children("div.acondition").last().children(".rhs").val(pairWith);
+            $(this).parent().next().children("div.acondition").last().children(".rhs").val(pairWith);
+        }       
+        // Adding associations (AND/OR) to the html        
+        if (config.displayAssociations) {
+            addAssociations($(this).siblings(".anyall").val(), $(this).parent().parent());// this.parent.parent refers to ruleTemplate            
         }
         populateRuleText($(this).parents());
     });
 
-    $(".ruleconditioncomponent").on("click",".ruleTemplate .removecondition", function() {
+    $(".ruleconditioncomponent").on("click",".ruleTemplate .removecondition", function() {        
         var cacheParents = $(this).parents();
-        $(this).parent().remove(); // removes 'acondition' class div                
+        var parentObj  = $(this).parent();
+        var parentRuleTemplate = $(parentObj).parent().parent();
+        $(parentObj).remove(); // removes 'acondition' class div
+        if (config.displayAssociations) {
+            removeAssociations(parentRuleTemplate);
+        }
         populateRuleText(cacheParents);
     });
 
     $(".ruleconditioncomponent").on("click",".ruleTemplate .removegroupcondition", function() {
         var cacheParents = $(this).parents();
+        var parentObj  = $(this).parent();
+        var parentRuleTemplate = $(parentObj).parent().parent();
         $(this).parent().parent().remove();
+        if (config.displayAssociations) {
+            removeAssociations(parentRuleTemplate);
+        }
         populateRuleText(cacheParents);
     });
 
     $(".ruleconditioncomponent").on("change", ".anyall", function() {
+        //console.log($(this).parent().siblings(".conditionclass").children(".associationclass"));
+        if (config.displayAssociations) {
+            var anyAll = "AND";
+            if ($(this).val() == 'Any') {
+                anyAll = "OR"
+            }
+            $(this).parent().siblings(".conditionclass").children(".associationclass").html(anyAll);
+            $(this).parent().siblings(".associationgroupclass").html(anyAll);
+        }
         populateRuleText($(this).parents());
     });
 
@@ -351,7 +431,6 @@ function attachEventHandlers() {
         ruleError(obj);
         $(this).parents(".textandlogicalform").children(" .logicalform").html("");
         $(this).parents(".textandlogicalform").children(".logicalform").append($("#subcategoryTemplate .logicalform").html());
-        console.log($(this).parents(".textandlogicalform").children(".logicalform").children());
         $(this).parents(".textandlogicalform").find(".removegroupcondition").remove();	                
     });
 
@@ -369,12 +448,12 @@ function attachEventHandlers() {
             }
         }
         if (ruleObj != null){
-            generateRuleTemplateFromText(ruleObj);
+            generateRuleTemplateFromText(ruleObj);// this function will also populate the lab dictionary in a subroutine            
         }
     });
 
     $("#addrule").on("click", ".saveAdd", function() {  // Save Function
-        if (!validateFieldsOnAddition()) {
+        if (!validateFieldsOnSave("#addrule")) {
             return;
         }
         var saveObject = {};                
@@ -399,12 +478,13 @@ function attachEventHandlers() {
             saveObject[comorbidityName] = rule;                    
         }
         newSavedRules.push(saveObject);
-        console.log(newSavedRules);
         triggerSuccessfulAddition();
     });
     
     $("#editrule").on("click", ".saveEdit", function() {  // Save Function
-        if (!validateFieldsOnAddition()) {
+        if (!validateFieldsOnSave("#editrule")) {
+            var message = "Errors exist in the rule definition. Please check!"
+            invokeModal(message, "FAILURE");
             return;
         }
         var saveObject = {};                
@@ -447,6 +527,98 @@ function attachEventHandlers() {
     });
 }  // end of attachEventHandlers function
 
+function addAssociations(anyAll, ruleTemplateObj) {    
+    if (anyAll == 'Any') {
+        anyAll = 'OR';
+    } else {
+        anyAll = 'AND';
+    }
+    var conditionsObj = ruleTemplateObj.children(".conditionclass");
+    var prevChild = null;
+    var currChild = null;    
+    var cachedChildren = conditionsObj.children();
+    for (var i = 0; i < cachedChildren.length; i++) {        
+        currChild = cachedChildren[i];
+        if (prevChild != null ){
+            var prevClass = $(prevChild).attr("class");
+            var currClass = $(currChild).attr("class");
+            if (prevClass=='acondition' && prevClass == currClass) {
+                $($(".associationTemplate").html()).insertAfter($(prevChild));
+                $(prevChild).next().html(anyAll);
+            }
+        }
+        prevChild = currChild;
+    }
+    prevChild = null;
+    currChild = null;
+    cachedChildren = ruleTemplateObj.children();
+    //debugger;
+    for (var i = 0; i < cachedChildren.length; i++) {
+        currChild = cachedChildren[i];
+        if (prevChild != null) {
+            var prevClass = $(prevChild).attr("class");
+            var currClass = $(currChild).attr("class");
+            var prevConditionLength = 0;
+            if (prevClass == "conditionclass") {
+                prevConditionLength = $(prevChild).children(".acondition").length;
+            }
+            if ((prevClass=='ruleTemplate' && prevClass == currClass) || (prevClass=='conditionclass' && prevConditionLength > 0 && currClass == 'ruleTemplate'))  {
+                $($(".associationGroupTemplate").html()).insertAfter($(prevChild));
+                $(prevChild).next().html(anyAll);
+            }
+        }
+        prevChild = currChild;
+    }        
+}
+
+function removeAssociations(ruleTemplateObj) {
+    var conditionsObj = ruleTemplateObj.children(".conditionclass");    
+    var cachedChildren = conditionsObj.children();
+    var currChild = cachedChildren[0];    
+    var nextChild = null;
+    var currClass = $(currChild).attr("class");
+    if (currClass == 'associationclass' && cachedChildren.length == 1) {
+        $(currChild).remove();
+    }
+    else {
+        for (var i = 1; i < cachedChildren.length; i++) {        
+            nextChild = cachedChildren[i];
+            var nextClass = $(nextChild).attr("class");            
+            if (currClass == 'associationclass' && (nextClass == currClass || i == 1)) {
+                $(currChild).remove();
+            }
+            else if (nextClass == 'associationclass' && i == cachedChildren.length - 1) {
+                $(nextChild).remove();
+                break;
+            }
+            currChild = cachedChildren[i];
+        }
+    }
+    
+    cachedChildren = ruleTemplateObj.children();
+    nextChild = null;
+    currChild = cachedChildren[0];
+    debugger;
+    var currClass = $(currChild).attr("class");
+    if (currClass == 'associationgroupclass' && cachedChildren.length == 1) {
+        $(currChild).remove();
+    }
+    else {
+        for (var i = 1; i < cachedChildren.length; i++) {
+            nextChild = cachedChildren[i];            
+            var nextClass = $(nextChild).attr("class");            
+            if (currClass == 'associationgroupclass' && (nextClass == currClass || i == 1)) {
+                $(currChild).remove();
+            }
+            else if (nextClass == 'associationgroupclass' && i == cachedChildren.length - 1) {
+                $(nextChild).remove();
+                break;
+            }
+            currChild = cachedChildren[i];
+        }
+    }    
+}
+
 function invokeModal(message, kindOfMessage) {
     $(".vieweditright #editrule").hide();
     $("div.modalTemplate").show();
@@ -458,7 +630,7 @@ function invokeModal(message, kindOfMessage) {
 }
 
 function triggerSuccessfulAddition() {//TODO beautify alert
-    alert("Rule Saved Successfully");
+    invokeModal("Rule Saved Successfully", "SUCCESS");
     $("#addrule .rulename").val("");
     $("#addrule .declaredrule").html("");
     $("#addrule .hassubcategory").prop("checked", "");
@@ -468,15 +640,37 @@ function triggerSuccessfulAddition() {//TODO beautify alert
     $("#addrule .ruleconditions .ruleTemplate").not(":first").remove();
     $("#addrule .acondition").remove();
     $("#addrule .multipreselect").select2("val","");
-    organizeOptions(labValues);
+    organizeOptions(labValues, "#addrule");
     ruleError($("#addrule .textrule"));
 }
 
-function validateFieldsOnAddition() {//TODO
+function validateFieldsOnSave(parentId) {//TODO
+    $(".nameerror").html("");
+    var errorCount = 0;
+    if ($(parentId + " .rulename").val() == "" || $(parentId + " .rulename").val().trim() == "") {
+        errorCount++;
+        $(parentId + " .nameerror").html("incorrect rule name!");
+    }
+    var ruleConditionsObjArray = $(parentId + " .ruleconditions");
+    for (var i = 0; i < ruleConditionsObjArray.length; i++) {
+        var definition = $(ruleConditionsObjArray[i]).find(".definition").val();
+        if (definition== "" || definition.trim() == "") {
+            errorCount++;
+            $(ruleConditionsObjArray[i]).find(".nameerror").html("incorrect subcategory name!");
+        }
+        var ruleconditions = $(ruleConditionsObjArray[i]).find(".acondition");
+        if (ruleconditions.length == 0) {
+            var html = $(ruleConditionsObjArray[i]).find(".nameerror").html();
+            $(ruleConditionsObjArray[i]).find(".nameerror").html(html + "&nbsp;No conditions defined!");
+            errorCount++;
+        }
+    }
+    if (errorCount > 0)
+        return false;
     return true;
 }
 
-function organizeOptions(optionsToPopulate) {
+function organizeOptions(optionsToPopulate, parentId) {
     var $selectN = $(".lhs");
     $(".lhs").empty();
     $.each(optionsToPopulate, function(key, val){ 
@@ -668,6 +862,17 @@ var parseTokensToHTML = function (interpText) {
     var isFirst = true;
     var multipleMode = 0;// 0 implies not multiple, 1 implies multiplication factor, 2 implies lab value
     recurseNode(node, parent, addcondition, identifierSide, isFirst, multipleMode);
+    if (config.displayAssociations) {
+        var subs = $("#editrule div.ruleconditions");
+        for (var i = 0; i < subs.length; i++) {
+            var subconds = $(subs[i]).find("div.ruleTemplate");
+            for (var j = 0; j < subconds.length; j++) {
+                var anyAll = $(subconds[j]).children(".groupclass").children(".anyall").first().val();
+                addAssociations(anyAll, $(subconds[j]));
+            }
+        }
+    }
+    
 }
 
 function verboseRuleText(interpreterText) {
@@ -693,10 +898,10 @@ var generateRuleTemplateFromText = function(ruleObj) {
         if (valueType === '[object Array]') {
             hasSubCategories = true;
             subCategoriesCount = subCategories.length;
-            console.log(subCategories);
         }
         break;
     }
+    populateLabDictionary(subCategories, hasSubCategories, subCategoriesCount, "#editrule");
     $(".vieweditparent .namecomponent .rulename").val(comorbidityName);
     $(".vieweditparent .declaredrule").html(comorbidityName);
     $("#editrule .ruleconditioncomponent").html("");
@@ -716,26 +921,63 @@ var generateRuleTemplateFromText = function(ruleObj) {
                 if (!config.editview_showlogicalbydefault) {
                     $("#editrule .ruleconditions:last .logicalform").hide();    
                     $("#editrule .ruleconditions:last .showlogicalform").show();
-                }                
+                }
                 break;
             }
             //$(obj).data("itext", interpretedRuleText);
             isFirstOne = false;
-        }                
+        }
     } else {
         $("#editrule .hassubcategory").prop("checked", "");
         $("#editrule .addAnother").hide();
         addSubCategory($("#editrule"), true);
         var ruleStr = subCategories;
         $("#editrule .ruleconditions:last .definition").val(comorbidityName);
-        $("#editrule .ruleconditions:last .definition").prop("disabled", "disabled");        
+        $("#editrule .ruleconditions:last .definition").prop("disabled", "disabled");
         ruleStr = parseTokensToText(ruleStr); // converting the interpreter text to english text 
         $("#editrule .ruleconditions:last .textrule").html(ruleStr).css({"borderColor":"green"});
         $("#editrule .ruleconditions:last .isrulevalid").html("");
         parseTokensToHTML(subCategories); // constructing the conditional builder HTML through this method
-            
+        if (!config.editview_showlogicalbydefault) {
+            $("#editrule .ruleconditions:last .logicalform").hide();
+            $("#editrule .ruleconditions:last .showlogicalform").show();
+        }
     }
-};            
+};
+
+function getLabValuesFromTokens(labPreselectOptions, auxDict, tokens) {
+    for (var i = 0; i < tokens.length; i++) {                 
+        if (labValueMap.hasOwnProperty(tokens[i])) {            
+            if (auxDict.indexOf(tokens[i]) < 0) {
+                auxDict.push(tokens[i]);
+                labPreselectOptions.push({"id" : tokens[i], "name" : labValueMap[tokens[i]]});
+            }
+        }
+    }
+    return labPreselectOptions;
+}
+
+function populateLabDictionary(subCategories, hasSubCategories, subCategoriesCount, parentId) {
+    var labDict = [];
+    var auxDict = []; // stores only the ids of the lab values (used for removing duplicates)
+    if (hasSubCategories) {
+        for (var i = 0; i < subCategoriesCount; i++) {
+            for (key in subCategories[i]) {
+                var ruleStr = subCategories[i][key];
+                var tokens = ruleStr.split(/\s+/);
+                getLabValuesFromTokens(labDict, auxDict, tokens); // passing labDict as reference to update the data structure
+                break;
+            }
+        }
+    }
+    else {
+        var ruleStr = subCategories;
+        var tokens = ruleStr.split(/\s+/); 
+        getLabValuesFromTokens(labDict, auxDict, tokens);
+    }    
+    organizeOptions(labDict, "#editrule");
+    $("#editrule .multipreselect").select2().val(auxDict).trigger("change");    
+}
 
 function getRuleString(obj) {
     //var str = ""; // stores the verbose (expanded) form the of rule definition
