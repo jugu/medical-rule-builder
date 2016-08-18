@@ -9,7 +9,7 @@
         <script src="rule.interpreter.interpreter.js"></script>
         <script src="rule.interpreter.evaluator.js"></script>
         <link rel="stylesheet" type="text/css" href="rule.addedit.css"/>
-		<script   src="https://code.jquery.com/jquery-1.12.4.min.js"   integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="   crossorigin="anonymous"></script>
+		<script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
 		 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css" rel="stylesheet" />
         <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
 		<script src="rule.addedit.main.js"></script>
@@ -45,7 +45,9 @@
 		</div>
 		<div id = "subcategoryTemplate" style='display:none'>
 			<div class = "ruleconditions">
-				<h2><span class='expandcollapse'>-</span> Conditions for : <input class="definition" type = 'text'/>&nbsp;&nbsp;&nbsp;&nbsp;<button class='removecategory' title="Delete this subcategory">X</button><span class="nameerror"></span>	</h2>
+				<h2><span class='expandcollapse'>-</span>
+                    <input type ='checkbox'/>use for other rules? Conditions for :
+                    <input class="definition" type = 'text'/>&nbsp;&nbsp;&nbsp;&nbsp;<button class='removecategory' title="Delete this subcategory">X</button><span class="nameerror"></span>	</h2>
                 <div class="textandlogicalform">
                     <div class="textform" align="center">
                         <div style="overflow: auto; width:80%; text-align:left">

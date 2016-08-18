@@ -1,6 +1,8 @@
 /**
  * @author Jugu Dannie Sundar <jugu [dot] 87 [at] gmail [dot] com>
  */
+
+// Support for exceptional cases when building rules
 var CONSTANTS = {
     "NUMBERSTRING" : "number",
     "MULTIPLESTRING" : "multiple",
@@ -8,12 +10,14 @@ var CONSTANTS = {
     "NOTPRESENT" : "==-1"
 };
 
+
+// These are some of the custom UI configurations.
 var config = {
     "showpreselect" : true,
-    "addview_expandpreselect" : false,
-    "editview_expandpreselect" : false,
-    "editview_showlogicalbydefault" : false,
-    "displayAssociations" : false,
+    "addview_expandpreselect" : false, // show the Lab Dictionary expanded by default in Add view
+    "editview_expandpreselect" : false, // show the Lab Dictionary expanded by default in Edit view
+    "editview_showlogicalbydefault" : false, // show the Editable Version expanded by default in Edit view
+    "displayAssociations" : false, // show the And/Or associations in the editable version of rule descriptors
     "defaults" : []
 };
 
@@ -21,6 +25,7 @@ var errorCode = {
     "rulenameerror" : {"identifier" : ""}
 }
 
+// Exhaustive list of operators supported and used in the rule builder
 var operators = [
     {"id":"<", "name":"less than"},
     {"id":">", "name":"greater than"},
@@ -54,16 +59,17 @@ $.map( commonSelectors, function( obj, index ) {
 });
 
 var labValueMap = {};
-var labValuePairMap = {}; //Pairing value for RHS
-var labValues = [];     
-var savedRulesJSON = [];
+var labValuePairMap = {}; //Pairing value for RHS based on the LHS lab values selected (used for default pairing to reduce clicks)
+var labValues = [];      // Stores the exhaustive list of labValues from the user json file
+var savedRulesJSON = []; // Tracks the current saved rules 
 var newSavedRules = []; // tracks newly added rules
 var currentEditComorb = ""; // tracks currently edited comorbidity
 
 var preselectedOptions = [];
 
 
-
+/* Loading the exhaustive list of lab values from the server file (for demo purpose). 
+In future development, the user will also have ability to load custom lab values*/
 function loadLabValues() {
     $.getJSON( "labValues.json", function( data ) {
       labValues = data;
@@ -73,6 +79,8 @@ function loadLabValues() {
     });
 }
 
+/* Loading the exhaustive list of lab rules(comorbidities) from the server file (for demo purpose). 
+In future development, the user will also have ability to load custom rules. (However, the defined rules should be built using the custom lab values for consistency and make things sensible)*/
 function loadDefinedRules() {
     $.getJSON( "definedrules.json", function( data ) {
         savedRulesJSON = data;    
@@ -83,6 +91,7 @@ function loadDefinedRules() {
     });
 }
 
+// After all data is obtained, load the rule addition page (by default)
 function postLoadData() {
     $.map( labValues, function( obj, index ) {
         labValueMap[obj.id] =  obj.name;
@@ -128,6 +137,7 @@ function postLoadData() {
     organizeOptions(preselectOptions, "#addrule");
 }
 
+// This will populate list of predefined rules in the Edit view
 function populateDefinedRules(savedRulesJSON) {
     for (var i = 0; i < savedRulesJSON.length; i++) {
         for (key in savedRulesJSON[i]) {
@@ -135,7 +145,7 @@ function populateDefinedRules(savedRulesJSON) {
             break;
         }
     }
-}        
+}
 // This function is called to attach events to the statically or dynamically created templates for buiding rule
 function attachEventHandlers() {
     
@@ -264,7 +274,7 @@ function attachEventHandlers() {
     $(".rulename").keyup(function() {									
         var obj = $(this).parent().parent().parent();
         $(obj).children("div.categorycomponent").find(".declaredrule").html($(this).val());
-        if ($(obj).children("div.categorycomponent").find(".hassubcategory").is(":checked") === false) {                                                        $(obj).children("div.ruleconditioncomponent").find(".ruleconditions h2 .definition").val($(this).val()).attr("disabled", true);
+        if ($(obj).children("div.categorycomponent").find(".hassubcategory").is(":checked") === false) {                                                                $(obj).children("div.ruleconditioncomponent").find(".ruleconditions h2 .definition").val($(this).val()).attr("disabled", true);
         }
     });
 
@@ -452,7 +462,7 @@ function attachEventHandlers() {
         }
     });
 
-    $("#addrule").on("click", ".saveAdd", function() {  // Save Function
+    $("#addrule").on("click", ".saveAdd", function() {  // Save Function on adding a new rule
         if (!validateFieldsOnSave("#addrule")) {
             return;
         }
@@ -498,14 +508,15 @@ function attachEventHandlers() {
             for (var i = 1; i <= categorycount; i++) {
                 obj = $("#editrule .ruleconditioncomponent .ruleconditions:nth-child("+i+")");
                 var definition = $(obj).find(".definition").val();
-                var rule = $(obj).find(".textrule").data("itext");
+                debugger;
+                var rule = $($(obj).find(".textrule")).data("itext");
                 var categoryObj = {};
                 categoryObj[definition] = rule;
                 saveObject[comorbidityName].push(categoryObj);
             }
         } else {
             var obj = $("#editrule .ruleconditioncomponent .ruleconditions").first();
-            var rule = $(obj).find(".textrule").data("itext");
+            var rule = $($(obj).find(".textrule")).data("itext");
             saveObject[comorbidityName] = rule;                    
         }
         for (var i = 0; i < savedRulesJSON.length; i++) {
@@ -515,6 +526,7 @@ function attachEventHandlers() {
                 }
             }
         }//TODO beautify successful operation message
+        console.log("saveEdit", savedRulesJSON);
         var message = "Changes saved Successfully!"
         invokeModal(message, "SUCESSS");        
     });
@@ -598,7 +610,6 @@ function removeAssociations(ruleTemplateObj) {
     cachedChildren = ruleTemplateObj.children();
     nextChild = null;
     currChild = cachedChildren[0];
-    debugger;
     var currClass = $(currChild).attr("class");
     if (currClass == 'associationgroupclass' && cachedChildren.length == 1) {
         $(currChild).remove();
@@ -644,7 +655,7 @@ function triggerSuccessfulAddition() {//TODO beautify alert
     ruleError($("#addrule .textrule"));
 }
 
-function validateFieldsOnSave(parentId) {//TODO
+function validateFieldsOnSave(parentId) {
     $(".nameerror").html("");
     var errorCount = 0;
     if ($(parentId + " .rulename").val() == "" || $(parentId + " .rulename").val().trim() == "") {
@@ -707,8 +718,8 @@ function populateRuleText(parents) {
         var interpretedRuleText = getRuleString($(parentObj).children(".logicalform").children(".ruletemplate"));
         var obj = $(parentObj).find(".textform .textrule");
         try {
-            var displayRuleText = verboseRuleText(interpretedRuleText);
-            $(obj).data("itext", interpretedRuleText);
+            var displayRuleText = verboseRuleText(interpretedRuleText);            
+            $(obj).data("itext", interpretedRuleText);            
             $(obj).html(displayRuleText);                    
             ruleIsFine(obj);
         } catch (err) {
@@ -913,7 +924,8 @@ var generateRuleTemplateFromText = function(ruleObj) {
             addSubCategory($("#editrule"), isFirstOne);
             for (key in subCategories[j]) {
                 $("#editrule .ruleconditions:last .definition").val(key);
-                var ruleStr = subCategories[j][key];                
+                var ruleStr = subCategories[j][key];
+                $("#editrule .ruleconditions:last .textrule").data("itext", ruleStr); // set data attribute for the textrule
                 ruleStr = parseTokensToText(ruleStr);// converting the interpreter text to english text 
                 $("#editrule .ruleconditions:last .textrule").html(ruleStr).css({"borderColor":"green"});
                 $("#editrule .ruleconditions:last .isrulevalid").html("");
@@ -924,7 +936,6 @@ var generateRuleTemplateFromText = function(ruleObj) {
                 }
                 break;
             }
-            //$(obj).data("itext", interpretedRuleText);
             isFirstOne = false;
         }
     } else {
@@ -934,6 +945,7 @@ var generateRuleTemplateFromText = function(ruleObj) {
         var ruleStr = subCategories;
         $("#editrule .ruleconditions:last .definition").val(comorbidityName);
         $("#editrule .ruleconditions:last .definition").prop("disabled", "disabled");
+        $("#editrule .ruleconditions:last .textrule").data("itext", ruleStr); // set data attribute for the textrule
         ruleStr = parseTokensToText(ruleStr); // converting the interpreter text to english text 
         $("#editrule .ruleconditions:last .textrule").html(ruleStr).css({"borderColor":"green"});
         $("#editrule .ruleconditions:last .isrulevalid").html("");

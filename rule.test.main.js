@@ -13,16 +13,17 @@ function attachEventHandlesForTesting() {
         $(".labvalueformdiv").html("");
         $(".testresultdiv").html("");        
         if (newSavedRules.length > 0) {  // newSavedRules and savedRulesJSON are declared/defined in rule.addedit.main.js
-            populateDefinedRules(newSavedRules);
             for (var i = 0; i < newSavedRules.length; i++)
                 savedRulesJSON.push(newSavedRules[i]);
             newSavedRules = [];
         }
         savedRules = savedRulesJSON;
+        console.log("testtab", savedRulesJSON);
+       $(".checkrule").first().prop("checked", "checked");
        populateTestRules(savedRules); // SavedRulesJSON object is created in rule.addedit.main.js 
     });
     
-    $(".checkrule").first().prop("checked", "checked").click(function() {       
+    $(".checkrule").first().click(function() {       
         if ($(this).prop("checked") === true) {
             $(".test .checkrule").not(":first").prop("checked", "checked");             
         }
