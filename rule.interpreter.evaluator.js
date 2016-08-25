@@ -81,6 +81,16 @@ var evaluate = function (parseTree, vars, processedResult) {
                 return (oldResultObj[currval] == true) ? 1 : -1;                
             }
         }
+        else {
+            for (key in oldResultObj) {
+                if (oldResultObj[key].hasOwnProperty(currval)) {
+                    if (oldResultObj[key][currval] === true) {
+                        return 1;
+                    }
+                }
+            }
+            return -1;
+        }
     }
     
     var levelToKMap= {};	
