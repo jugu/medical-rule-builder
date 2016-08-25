@@ -18,6 +18,8 @@ var config = {
     "editview_expandpreselect" : false, // show the Lab Dictionary expanded by default in Edit view
     "editview_showlogicalbydefault" : false, // show the Editable Version expanded by default in Edit view
     "displayAssociations" : false, // show the And/Or associations in the editable version of rule descriptors
+    "displayAnyK" : true, // Allow user to create conditions of type any 2, any 3, any 4...
+    "usePreviouslyDefinedorSavedRules" : true, // This is used for population the lhs options of the condition based on previously defined rules or previously defined subcategories for current rule
     "defaults" : []
 };
 
@@ -48,6 +50,8 @@ $.map( operators, function( obj, index ) {
 var operatorButtons = [];
 $.merge(operatorButtons, operators);
 
+
+//These are the common list of selectors for Operators dropdown which manipulate the display of condition
 var commonSelectors = [
     {"id":"number", "name":"value"},
     {"id":"multiple", "name":"multiple of"}
@@ -82,7 +86,7 @@ function loadLabValues() {
 /* Loading the exhaustive list of lab rules(comorbidities) from the server file (for demo purpose). 
 In future development, the user will also have ability to load custom rules. (However, the defined rules should be built using the custom lab values for consistency and make things sensible)*/
 function loadDefinedRules() {
-    $.getJSON( "definedrules.json", function( data ) {
+    $.getJSON( "rules.json", function( data ) {
         savedRulesJSON = data;    
         populateDefinedRules(savedRulesJSON);
         postLoadData();
@@ -148,7 +152,8 @@ function populateDefinedRules(savedRulesJSON) {
 }
 // This function is called to attach events to the statically or dynamically created templates for buiding rule
 function attachEventHandlers() {
-    
+
+   // This event handler on the checkbox (display associations) changes the config for displaying association text (AND, OR) in between html editable condition construct
     $("#displayassoc").on("change", function() {
         if ($(this).is(":checked")) {
             config.displayAssociations = true;
@@ -157,6 +162,7 @@ function attachEventHandlers() {
             config.displayAssociations = false;
     });
     
+    // This event handler toggles between showing and hiding the editable HTML version of the rule
     $("#editrule").on("click", ".showlogicalform", function() {
         var text = $(this).html();
         if (text.search("Show") >= 0) {
@@ -169,6 +175,7 @@ function attachEventHandlers() {
         $(this).parent().next().toggle();
     });
     
+    // This event handler undoes the changes by the user for the current rule and restores the original defined rule and its HTML construct
     $("#editrule").on("click", ".reset", function() {
         var ruleObj = null;
         for (var i = 0; i < savedRulesJSON.length; i++) {
@@ -179,10 +186,11 @@ function attachEventHandlers() {
         }
         $(this).parent().parent().find(".rulename").val(currentEditComorb);
         if (ruleObj != null){
-            generateRuleTemplateFromText(ruleObj);
+            generateRuleTemplateFromText(ruleObj, labValueMap, savedRulesJSON);
         }
     });
 
+    // This event handler exports the JSON format of the interpreted text for all the defined rules
     $(".export").mouseover(function() {
         $(".definedrules").css({'background-color':'yellow'})
     }).mouseout(function() {
@@ -197,6 +205,7 @@ function attachEventHandlers() {
         link.click();
     });
     
+    // This event handler prepopulates the lhs and rhs options based on the preselect options - Add flow
     $(".addtab").click(function() {
         $(".nameerror").html("");
         var preselectOptions = labValues;
@@ -209,7 +218,8 @@ function attachEventHandlers() {
         }
        organizeOptions(preselectOptions, "#addrule"); 
     });
-
+    
+    //This event handler populates the previously defined / saved rules as part of the edit flow
     $(".edittab").click(function () {
         $(".definedrules p").removeClass();
         $(".nameerror").html("");
@@ -222,6 +232,7 @@ function attachEventHandlers() {
         }
     });
 
+    // This event handler organnizes the lhs (and/or rhs) options based on the preselected values as part of ADD flow
     $("#addrule .multipreselect").on("select2:select select2:unselect", function (e) {
         //this returns all the selected item
         var preselectOptions = [];                
@@ -232,16 +243,16 @@ function attachEventHandlers() {
         organizeOptions(preselectOptions, "#addrule");
     });
     
+    // This event handler toggles the display div of the preselect (Lab Dictionary) options in the ADD flow
     $('#addrule .preselect h2').click(function(e) {
         $('#addrule .preselect div').slideToggle();
         if ($(this).children(".expandcollapse").text() === '+')
             $(this).children(".expandcollapse").text('-')
         else
-            $(this).children(".expandcollapse").text('+')
-        //$(this).toggleClass('active');
-        //e.preventDefault();
+            $(this).children(".expandcollapse").text('+')        
     });
     
+    // This event handler organnizes the lhs (and/or rhs) options based on the preselected values as part of EDIT flow
     $("#editrule .multipreselect").on("select2:select select2:unselect", function (e) {
         //this returns all the selected item
         var preselectOptions = [];                
@@ -252,16 +263,16 @@ function attachEventHandlers() {
         organizeOptions(preselectOptions, "#editrule");
     });
 
+    // This event handler toggles the display div of the preselect (Lab Dictionary) options in the EDIT flow
     $('#editrule .preselect h2').click(function(e) {
         $('#editrule .preselect div').slideToggle();
         if ($(this).children(".expandcollapse").text() === '+')
             $(this).children(".expandcollapse").text('-')
         else
             $(this).children(".expandcollapse").text('+')
-        //$(this).toggleClass('active');
-        //e.preventDefault();
     });
 
+    //This event handle toggles the tabs between ADD, EDIT, and TEST based user choice
     $(".tabs-menu a").click(function(event) {
         event.preventDefault();
         $(this).parent().addClass("current");
@@ -271,17 +282,20 @@ function attachEventHandlers() {
         $(tab).fadeIn();
     });
 
+    //This event handler binds the typed rule name with the 1st subcategory name as a default.
     $(".rulename").keyup(function() {									
         var obj = $(this).parent().parent().parent();
         $(obj).children("div.categorycomponent").find(".declaredrule").html($(this).val());
         if ($(obj).children("div.categorycomponent").find(".hassubcategory").is(":checked") === false) {                                                                $(obj).children("div.ruleconditioncomponent").find(".ruleconditions h2 .definition").val($(this).val()).attr("disabled", true);
         }
     });
-
+    
+    //This event handler adds the subcategory div for the current rule to allow user to define new subcategory under the rule
     $(".addAnother button").click(function() {            
         addSubCategory($(this).parent().parent(), false);				
     });					
 
+    //This event handler for the checkbox (whether rule has subcategory) toggles the "Add subcategory" button which allows user to add multiple subcategories
     $(".hassubcategory").change(function() {
         var obj = $(this).parent().parent().parent();
         if (this.checked) {
@@ -293,11 +307,13 @@ function attachEventHandlers() {
             $(obj).children(".addAnother").hide();		
         }
     });
-
+    
+    // This event handler prevents the propogation of div toggle on the parent as input is sought from user
     $(".ruleconditioncomponent").on("click", ".ruleconditions h2 input", function(e) {
         e.stopPropagation();
     });
 
+    //This event handler toggles the display div of the rule condition(for a subcategory)
     $(".ruleconditioncomponent").on("click", ".ruleconditions h2", function() {
         if ($(this).children(".expandcollapse").text() === '+') {
             $(this).children(".expandcollapse").text('-');                    
@@ -309,12 +325,13 @@ function attachEventHandlers() {
         }                                   
     });
 
+    // This event handler removes the current subcategory based on the user action
     $(".ruleconditioncomponent").on("click",".ruleconditions h2 button", function(e){
         e.stopPropagation();
         $(this).parent().parent().remove();
-        //populateRuleText();
     });
 
+    // This event handler adds the group condition in the rule conditions div
     $(".ruleconditioncomponent").on("click",".ruleTemplate .groupcondition", function() {			                        
         var html = $("#subcategoryTemplate .ruleTemplate").clone().wrap('<p/>').parent().html();				
         $(this).parent().parent().append(html); // append html to 'groupclass' div
@@ -323,23 +340,39 @@ function attachEventHandlers() {
             addAssociations(anyAll, $(this).parent().parent());
         }
         populateRuleText($(this).parents());        
-    });			
+    });
     
-    $(".ruleconditioncomponent").on("click",".ruleTemplate .condition", function() {            
+    // This event handler adds the condition which can be based on available variables (labvalues)
+    $(".ruleconditioncomponent").on("click",".ruleTemplate .condition, .ruleTemplate .conditionlabvalue", function() {            
         var html = $("#conditionTemplate").html();        
-        $(this).parent().next().append(html); // append html to 'conditionclass' div        
-        var lhsId = $(this).parent().next().children("div.acondition").last().children(".lhs").children(":selected").attr("value");
+        $(this).parents(".groupclass").next().append(html); // append html to 'conditionclass' div        
+        var lhsId = $(this).parents(".groupclass").next().children("div.acondition").last().children(".lhs").children(":selected").attr("value");
         if (labValuePairMap.hasOwnProperty(lhsId)) {
             var pairWith = labValuePairMap[lhsId];
-            $(this).parent().next().children("div.acondition").last().children(".rhs").val(pairWith);
+            $(this).parents(".groupclass").next().children("div.acondition").last().children(".rhs").val(pairWith);
         }       
         // Adding associations (AND/OR) to the html        
         if (config.displayAssociations) {
-            addAssociations($(this).siblings(".anyall").val(), $(this).parent().parent());// this.parent.parent refers to ruleTemplate            
+            addAssociations($(this).siblings(".anyall").val(), $(this).parents(".ruleTemplate"));// this.parent.parent refers to ruleTemplate            
+        }
+        populateRuleText($(this).parents());
+    });
+    
+    // This event handler adds the condition which can be based on previously defined rules or previously defined subconditions for current rule
+    $(".ruleconditioncomponent").on("click",".ruleTemplate .conditionsubrule", function() {
+        var html = $("#conditionTemplate").html();        
+        $(this).parents(".groupclass").next().append(html); // append html to 'conditionclass' div        
+        populatePrevDefinedConditionsInLHS($(this).parents(".groupclass").next().children("div.acondition").last().children(".lhs"), savedRulesJSON);
+        $(this).parents(".groupclass").next().children("div.acondition").last().children(".rhs").remove();
+        keepOnlyExistsOrNotExistsOperators($(this).parents(".groupclass").next().children("div.acondition").last().children(".operator"))
+        // Adding associations (AND/OR) to the html        
+        if (config.displayAssociations) {
+            addAssociations($(this).siblings(".anyall").val(), $(this).parents(".ruleTemplate"));// this.parent.parent refers to ruleTemplate            
         }
         populateRuleText($(this).parents());
     });
 
+    // This event handler removes the current condition
     $(".ruleconditioncomponent").on("click",".ruleTemplate .removecondition", function() {        
         var cacheParents = $(this).parents();
         var parentObj  = $(this).parent();
@@ -351,6 +384,7 @@ function attachEventHandlers() {
         populateRuleText(cacheParents);
     });
 
+    // This event handler removes the current group condition
     $(".ruleconditioncomponent").on("click",".ruleTemplate .removegroupcondition", function() {
         var cacheParents = $(this).parents();
         var parentObj  = $(this).parent();
@@ -361,21 +395,34 @@ function attachEventHandlers() {
         }
         populateRuleText(cacheParents);
     });
-
+        
+    // This event handler changes the associations between conditions/group conditions
     $(".ruleconditioncomponent").on("change", ".anyall", function() {
-        //console.log($(this).parent().siblings(".conditionclass").children(".associationclass"));
-        if (config.displayAssociations) {
-            var anyAll = "AND";
-            if ($(this).val() == 'Any') {
-                anyAll = "OR"
+        var anyAll = "AND";
+        if ($(this).val() == 'Any') {
+            anyAll = "OR";                
+        }
+        if (config.displayAnyK) {
+            if (anyAll == 'OR') {
+                $("<input type='number' value='1' min='1' class='inputforany'></input>").insertAfter($(this));
+            } else {
+                $(this).next().remove();
             }
+        }
+        if (config.displayAssociations) {            
             $(this).parent().siblings(".conditionclass").children(".associationclass").html(anyAll);
             $(this).parent().siblings(".associationgroupclass").html(anyAll);
         }
         populateRuleText($(this).parents());
     });
-
-    $(".ruleconditioncomponent").on("change", ".acondition .lhs", function() {     
+    
+    // This event handler is for handling the case of Any 2, Any 3, ... , and so on. The rule text is modified based on user selection
+    $(".ruleconditioncomponent").on("change", ".inputforany", function() {
+       populateRuleText($(this).parents());
+    });
+    
+    // Changing left hand side of the condition operands
+    $(".ruleconditioncomponent").on("change", ".acondition .lhs", function() {
         var lhsId = $(this).children(":selected").attr("value");
         if (labValuePairMap.hasOwnProperty(lhsId)) {
             var pairWith = labValuePairMap[lhsId];
@@ -384,10 +431,12 @@ function attachEventHandlers() {
         populateRuleText($(this).parents());
     });
 
+    // Changing the operator of the condition
     $(".ruleconditioncomponent").on("change", ".acondition .operator", function() {
         var selectedId = $(this).children(":selected").attr("value");
-        if (selectedId === CONSTANTS.NOTPRESENT || selectedId === CONSTANTS.PRESENT) {
-            $(this).next().hide();
+        if (selectedId === CONSTANTS.NOTPRESENT || selectedId === CONSTANTS.PRESENT) {            
+            if ($(this).next().attr('class') != 'removecondition')
+                $(this).next().hide();
         }
         else {
             $(this).next().show();
@@ -395,6 +444,7 @@ function attachEventHandlers() {
         populateRuleText($(this).parents());
     });
 
+    // Changing the right hand side of the condition operands
     $(".ruleconditioncomponent").on("change", ".acondition .rhs", function() {
         var rhsVal = $(this).children(":selected").attr("value");
         if (rhsVal == CONSTANTS.NUMBERSTRING) {
@@ -430,10 +480,12 @@ function attachEventHandlers() {
         populateRuleText($(this).parents());
     });
 
+    // Changing the rule text based on user input for a condition involving value or multiple
     $(".ruleconditioncomponent").on("change keyup", ".acondition input", function() {
         populateRuleText($(this).parents());
     });
-
+    
+    // Reset the rule text
     $(".ruleconditioncomponent").on("click", ".isrulevalid button.clear", function() {
         var obj = $(this).parent().parent().children(".textrule");                          
         obj.html("");
@@ -444,6 +496,7 @@ function attachEventHandlers() {
         $(this).parents(".textandlogicalform").find(".removegroupcondition").remove();	                
     });
 
+    // Populate the HTML construct for the selected rule in the EDIT view
     $(".vieweditparent").on("click", ".definedrules p", function() {
         $(".definedrules p").removeClass("selected_edit_rule");
         $(this).addClass("selected_edit_rule");
@@ -458,10 +511,11 @@ function attachEventHandlers() {
             }
         }
         if (ruleObj != null){
-            generateRuleTemplateFromText(ruleObj);// this function will also populate the lab dictionary in a subroutine            
+            generateRuleTemplateFromText(ruleObj, labValueMap, savedRulesJSON);// this function will also populate the lab dictionary in a subroutine            
         }
     });
 
+    // Saving the rule in the ADD flow
     $("#addrule").on("click", ".saveAdd", function() {  // Save Function on adding a new rule
         if (!validateFieldsOnSave("#addrule")) {
             return;
@@ -491,6 +545,7 @@ function attachEventHandlers() {
         triggerSuccessfulAddition();
     });
     
+    // Saving the rule in the EDIT flow
     $("#editrule").on("click", ".saveEdit", function() {  // Save Function
         if (!validateFieldsOnSave("#editrule")) {
             var message = "Errors exist in the rule definition. Please check!"
@@ -525,8 +580,7 @@ function attachEventHandlers() {
                     savedRulesJSON[i] = saveObject;
                 }
             }
-        }//TODO beautify successful operation message
-        console.log("saveEdit", savedRulesJSON);
+        }//CANDO beautify successful operation message        
         var message = "Changes saved Successfully!"
         invokeModal(message, "SUCESSS");        
     });
@@ -539,6 +593,63 @@ function attachEventHandlers() {
     });
 }  // end of attachEventHandlers function
 
+
+var keepOnlyExistsOrNotExistsOperators = function (operatorObj) {
+    $(operatorObj).children().remove();
+    $(operatorObj).append('<option value="!=-1">is present</option>');
+    $(operatorObj).append('<option value="==-1">is not present</option>');
+};
+
+var populatePrevDefinedConditionsInLHS = function (lhsObj, otherDefinedRules) {
+    var categoriesArr = $(lhsObj).parents(".ruleconditioncomponent").find(".ruleconditions");            
+    $(lhsObj).children().remove();
+    var curcond = $(lhsObj).parents(".ruleconditions").find(".definition").val();
+    for (var i = 0; i < categoriesArr.length; i++) {                
+        var conditionStr = $(categoriesArr[i]).find(".definition").val();
+        if (curcond == conditionStr)
+            break;
+        var arr = conditionStr.split(" ");
+        var valstr = arr.join("_");  
+        $(lhsObj).append('<option value="'+valstr+'">'+conditionStr+'</option>');
+    }
+    if (config.usePreviouslyDefinedorSavedRules) {
+        for (var i = 0; i < otherDefinedRules.length; i++) {
+            for (key in otherDefinedRules[i]) {
+                var concat_arr = key.split(" ");
+                var concatStr = concat_arr.join("_");
+                $(lhsObj).append('<option value="'+concatStr+'" class="otherdefined">'+key+'</option>');
+                break;
+            }
+        }
+    }            
+};
+
+var checkForNodeValueAsPrevDefinedCondition = function (definedRules, nodeValue, conditionName, conditionCategories) {
+    for (var i = 0; i < definedRules.length; i++) {
+        for (var key in definedRules[i]) {
+            if (key === nodeValue) {
+                return true;
+            }            
+            break;
+        }
+    }
+    if (conditionCategories) {
+        for (var j = 0; j < conditionCategories.length; j++) {
+            for (key in conditionCategories[j]) {
+                console.log(key);
+                var no_str = nodeValue.split("_").join(" ");
+                if (key === no_str) {
+                    console.log("here");
+                    return true;
+                }
+            }
+            break;
+        }
+    }
+    return false;
+};
+
+//This function adds associations (AND / OR) between conditions /group conditions in the HTML form
 function addAssociations(anyAll, ruleTemplateObj) {    
     if (anyAll == 'Any') {
         anyAll = 'OR';
@@ -583,6 +694,7 @@ function addAssociations(anyAll, ruleTemplateObj) {
     }        
 }
 
+//This function removes associations (AND / OR) between conditions /group conditions present in the HTML form
 function removeAssociations(ruleTemplateObj) {
     var conditionsObj = ruleTemplateObj.children(".conditionclass");    
     var cachedChildren = conditionsObj.children();
@@ -681,6 +793,7 @@ function validateFieldsOnSave(parentId) {
     return true;
 }
 
+// This method populates the LHS and RHS options based on the preselected lab values. If no preselected labvalues are present, then all the lab values are added as options
 function organizeOptions(optionsToPopulate, parentId) {
     var $selectN = $(".lhs");
     $(".lhs").empty();
@@ -720,7 +833,8 @@ function populateRuleText(parents) {
         try {
             var displayRuleText = verboseRuleText(interpretedRuleText);            
             $(obj).data("itext", interpretedRuleText);            
-            $(obj).html(displayRuleText);                    
+            $(obj).html(displayRuleText);
+            adjustTextForAnyK($(obj), interpretedRuleText);
             ruleIsFine(obj);
         } catch (err) {
             ruleError(obj);
@@ -729,67 +843,193 @@ function populateRuleText(parents) {
 }
 
 function ruleIsFine(obj) {
-    $(obj).next().find("span").css({"color":"green"}).html("Definition is valid");
+    //$(obj).next().find("span").css({"color":"green"}).html("Definition is valid");
     $(obj).css({"border-color":"green"}); 
 }
 
 function ruleError(obj) {
-    $(obj).next().find("span").html("Definition is Invalid").css({"color":"red"});
+    //$(obj).next().find("span").html("Definition is Invalid").css({"color":"red"});
     $(obj).css({"border-color":"red"});            
 }
 
+// This function converts the interpreter language into user readable text form which is show above the editable version of the rule
 var parseTokensToText = function (interpText) {
     var returnStr = "";
-    try {                
-        var tokens = interpText.split(/\s+/);                
-        for (var i = 0; i < tokens.length; i++) {                    
-            if (labValueMap.hasOwnProperty(tokens[i])) {
-                // checking if previous token is a non grouping operator which implies that it is RHS
-                if (i > 0 && operatorMap.hasOwnProperty(tokens[i - 1]) && 
-                    $.inArray(tokens[i - 1],['&&','||','(']) == -1) {
-                    returnStr += "<span style='color:red'>" + labValueMap[tokens[i]] + "</span>";
-                } else {
-                    returnStr += "<span style='color:green'>" + labValueMap[tokens[i]] + "</span>";
+    var retArr = [];
+    // In case of Any K type of condition, we need to reiterate and plug in the text at appropriate locations
+    var backtrackAndPlugAnyK = function(textArr) {
+        var pluggedArr = $.extend(true, [], textArr);
+        
+        var insertAnyKText = function(curIndex, kvalue, arr) {
+            var strStart = "<div><span class='textForAny'>Any "+kvalue+" of </span><br/><span class='textForAny'>(</span><div style='margin-left:50px'>";
+            var strEnd = "</div><span class='textForAny'>)</span></div>";
+            var itemIn = {"id":"kvalueStart","value":kvalue,"str":strStart};
+            var itemOut = {"id":"kvalueEnd","value":kvalue,"str":strEnd};
+            var inIndex = -1;
+            var outIndex = -1;
+            var groupEndOccurred = false;
+            for (var i = curIndex - 1; i >= 0; i--) {
+                if (arr[i]['id'] === 'kvalueStart') {
+                    break;
+                }
+                if (arr[i]['id'] == "groupend") {
+                    groupEndOccurred = true;
+                }
+                if (arr[i]['id'] ==="groupstart" && !groupEndOccurred) {
+                    inIndex = i + 1;                    
+                    break;
+                }
+                if (i == 0) {
+                    inIndex = i;
                 }
             }
-            else if (operatorMap.hasOwnProperty(tokens[i])) {
+            if (inIndex == 0) {
+                outIndex = arr.length - 1;
+            }
+            if (inIndex > 0) {
+                var groupStartOccurred = false;
+                for (var i = curIndex + 1; i < arr.length; i++) {
+                    if (arr[i]['id'] === 'kvalueEnd') {
+                        break;
+                    }
+                    if (arr[i]['id'] == "groupstart") {
+                        groupStartOccurred = true;
+                    }
+                    if (arr[i]['id'] === 'groupend') {
+                        if (groupStartOccurred) 
+                            groupStartOccurred = false;
+                        else {
+                            outIndex = i;
+                            break;
+                        }
+                    }
+                    if (i == arr.length - 1) {
+                        outIndex = i;
+                    }
+                }
+            }
+            if (inIndex >= 0 && outIndex > 0) {
+                arr.splice(inIndex, 0, itemIn);
+                arr.splice(outIndex + 1, 0, itemOut);
+            }
+            return arr;
+        }
+        
+        for (var i = 0; i < textArr.length; i++) {
+            if (textArr[i].hasOwnProperty("anykvalue")) {
+                pluggedArr = insertAnyKText(i, textArr[i]['anykvalue'], pluggedArr);
+            }            
+        }
+        return pluggedArr;
+    }
+        
+    try {                
+        var tokens = interpText.split(/\s+/);                 
+                
+        for (var i = 0; i < tokens.length; i++) {
+            var strObj = {};
+            var isAnyKTokenBool = /\|\|\d+$/.test(tokens[i]);
+            if (labValueMap.hasOwnProperty(tokens[i])) {
+                // checking if previous token is a non grouping operator which implies that it is RHS
+                // LHS arguments are shown in green and RHS arguments are shown in red
+                if ( i > 0 && ( $.inArray(tokens[i - 1], ['>','<','>=','<=']) >= 0)) {
+                    strObj = {};
+                    strObj["id"] = "rhs";
+                    strObj["str"] = "<span style='color:red'>" + labValueMap[tokens[i]] + "</span>"; 
+                    retArr.push(strObj);
+                } else {
+                    strObj = {};
+                    strObj["id"] = "lhs";
+                    strObj["str"] = "<span style='color:green'>" + labValueMap[tokens[i]] + "</span>";
+                    retArr.push(strObj);
+                }
+            } 
+            // checking for operators and translating them to the text form
+            else if (operatorMap.hasOwnProperty(tokens[i]) || isAnyKTokenBool) {
                 var op = operatorMap[tokens[i]];                        
-                if (tokens[i] === '(') {                            
-                    returnStr += "<div>" + op.toUpperCase() + "<div style='margin-left:50px'>";
+                if (tokens[i] === '(') {
+                    strObj = {};
+                    strObj["id"] = "groupstart";
+                    strObj["str"] = "<div>" + op.toUpperCase() + "<div style='margin-left:50px'>";
+                    retArr.push(strObj);
                 } else if (tokens[i] === ')') {
-                    returnStr += "</div>" + op.toUpperCase() + "</div>";
+                    strObj = {};
+                    strObj["id"] = "groupend";
+                    strObj["str"] = "</div>" + op.toUpperCase() + "</div>";
+                    retArr.push(strObj);
                 }
-                else if (tokens[i] === "&&" || tokens[i] === "||") {
-                    if (tokens[i - 1] != ')')
-                        returnStr += "<br/>";
-                    returnStr +=  op.toUpperCase()+"<br/>";    
+                else if (tokens[i] === "&&" || tokens[i] === '||' || isAnyKTokenBool) {                    
+                    if (tokens[i - 1] != ')') { //Just to save an extra line break in the user visible text form of the rule (can be omitted)
+                        strObj = {};
+                        strObj["id"] = "andorsupp";
+                        strObj["str"] = "<br/>";
+                        retArr.push(strObj);
+                    }
+                    strObj = {};
+                    strObj["id"] = "andor";
+                    if (isAnyKTokenBool) {
+                        op = operatorMap['||'];
+                        var num = tokens[i].split("||")[1]; // argument in anyK
+                        strObj["anykvalue"] = num;
+                    }                    
+                    strObj["str"] = op.toUpperCase()+"<br/>";
+                    retArr.push(strObj);
                 }
-                else if (tokens[i] === '==-1' || tokens[i] === '!=-1') {                            
-                    returnStr += op;//op.toUpperCase();
+                else if (tokens[i] === '==-1' || tokens[i] === '!=-1') {
+                    strObj = {};
+                    strObj["id"] = "presentnotpresent";
+                    strObj["str"] = op;
+                    retArr.push(strObj);
                 }
                 else {
-                    returnStr += op;//tokens[i];//op.toUpperCase();
+                    strObj = {};
+                    strObj["id"] = "none";
+                    strObj["str"] = op;
+                    retArr.push(strObj);
                 }
             }
             else {
-                returnStr += "<span style='color:brown'>" + tokens[i] + "</span>";
+                strObj = {};
+                strObj["id"] = "value";
+                var dispStr = tokens[i];
+                if (/_/.test(dispStr)) { // Underscores in token imply that can be one of the previously defined comorbidities or comorbidity condition
+                    var arr = dispStr.split("_");
+                    dispStr = arr.join(" ");
+                }
+                strObj["str"] = "<span style='color:brown'>" + dispStr + "</span>";
+                retArr.push(strObj);            
             }
-            returnStr += " ";
+            strObj = {};
+            strObj["id"] = "space";
+            strObj["str"] = " ";
+            retArr.push(strObj);
         }
     } catch (err) {
         returnStr = err;
+    }
+    returnStr = "";
+    retArr = backtrackAndPlugAnyK(retArr);
+    for (var i = 0; i < retArr.length; i++) {
+        returnStr += retArr[i]["str"];
     }
     return returnStr;
 };
 
 
 
-// This function has a recursive method implementation to construct the rule HTML for edit view
-var parseTokensToHTML = function (interpText) {
+// This function has a recursive method implementation to construct the rule HTML from the interpreter text for edit view
+var parseTokensToHTML = function (interpText, labValuesMap, definedRules, currentName, currentSubCategories) {
     var tokens = lexer (interpText);
     var parseTree = parse(tokens);
     var node = parseTree[0];// for one comorb rule there will be only one parse tree            
     var parent = $("#editrule div.ruleconditions:last div.logicalform div.ruleTemplate:last p:first");
+    /* 
+      node : Current node
+      addCondition : whether the current node should create a new condition template
+      identifierOnWhichSide: indicator of whether the node should be on LHS or RHS
+      isFirst : whether it is the very first node or not.
+      multipleMode : Whether current node is part of a condition of the form similar to  LEFT < currentnode.value * RIGHT
+    */
     var recurseNode = function(node, parent, addcondition, identifierOnWhichSide, isFirst, multipleMode) {   
         if (!node)
             return;                            
@@ -797,12 +1037,14 @@ var parseTokensToHTML = function (interpText) {
         if (node.hasOwnProperty("group") ) {
             if (node.type === '||' || node.type === '&&') {
                 var tempParent = parent;
-                if ($(tempParent).prop("nodeName") === 'P') {
+                if ($(tempParent).prop("nodeName") === 'P') { // checking for paragraph which only has individual conditions
                     tempParent = $(tempParent).parent();
                 }
                 $(tempParent).append($("#subcategoryTemplate .logicalform").html());                        
                 if (node.type == "||") {                        
                     $(tempParent).find("select.anyall:last").val("Any");
+                    var anyStr = "<input type='number' value='"+node.value+"' min='1' class='inputforany'></input>";                    
+                    $(anyStr).insertAfter($(tempParent).find("select.anyall:last"));
                 }
                 parent = $(tempParent).find("div.ruleTemplate:last p:first");
             }
@@ -815,16 +1057,24 @@ var parseTokensToHTML = function (interpText) {
             if ($(tempParent).prop("nodeName") === 'P') {
                 tempParent = $(tempParent).parent();
             }
+            var anyStr = "<input type='number' value='"+node.value+"' min='1' class='inputforany'></input>";                                
             $(tempParent).find("select.anyall:last").val("Any");
-        }                                
-        else if (node.type !== '&&' && node.type !== '||' && node.type !== 'identifier' && node.type !== '*' && multipleMode == 0){
+            $(anyStr).insertAfter($(tempParent).find("select.anyall:last"));
+        }                  
+        else if ($.inArray(node.type, ['&&','||','identifier','*'])  == -1 && multipleMode == 0){
             conditionAppend = true;
         }
         if (identifierOnWhichSide === 'LEFT') {
             if (multipleMode == 1 && node.type == 'number') { // special case for multiplication
                 $(parent).find(".acondition:last input").val(node.value);
             } else {
-                $(parent).find(".acondition:last .lhs").val(node.value);
+                if (labValuesMap.hasOwnProperty(node.value)) {
+                    $(parent).find(".acondition:last .lhs").val(node.value);
+                }
+                else if (checkForNodeValueAsPrevDefinedCondition(definedRules, node.value, currentName, currentSubCategories)) {
+                    populatePrevDefinedConditionsInLHS($(parent).find(".acondition:last .lhs"), definedRules);
+                    $(parent).find(".acondition:last .lhs").val(node.value);
+                }
             }
         }
         else if (identifierOnWhichSide === 'RIGHT') {
@@ -882,8 +1132,7 @@ var parseTokensToHTML = function (interpText) {
                 addAssociations(anyAll, $(subconds[j]));
             }
         }
-    }
-    
+    }    
 }
 
 function verboseRuleText(interpreterText) {
@@ -896,8 +1145,8 @@ function verboseRuleText(interpreterText) {
     return newText;
 }                            
 
-// This method is used in the edit view to create the html template based on a rule definition obtained from the saved/defined rules
-var generateRuleTemplateFromText = function(ruleObj) {
+// This method is used in the edit view to create the html template based on a rule definition obtained from the saved/defined rules - This is used in EDIT flow
+var generateRuleTemplateFromText = function(ruleObj, labValues, savedRules) {
     var comorbidityName = "";
     var hasSubCategories = false;
     var subCategoriesCount = 0;
@@ -929,7 +1178,7 @@ var generateRuleTemplateFromText = function(ruleObj) {
                 ruleStr = parseTokensToText(ruleStr);// converting the interpreter text to english text 
                 $("#editrule .ruleconditions:last .textrule").html(ruleStr).css({"borderColor":"green"});
                 $("#editrule .ruleconditions:last .isrulevalid").html("");
-                parseTokensToHTML(subCategories[j][key]);
+                parseTokensToHTML(subCategories[j][key], labValues, savedRules, comorbidityName, subCategories);
                 if (!config.editview_showlogicalbydefault) {
                     $("#editrule .ruleconditions:last .logicalform").hide();    
                     $("#editrule .ruleconditions:last .showlogicalform").show();
@@ -949,7 +1198,7 @@ var generateRuleTemplateFromText = function(ruleObj) {
         ruleStr = parseTokensToText(ruleStr); // converting the interpreter text to english text 
         $("#editrule .ruleconditions:last .textrule").html(ruleStr).css({"borderColor":"green"});
         $("#editrule .ruleconditions:last .isrulevalid").html("");
-        parseTokensToHTML(subCategories); // constructing the conditional builder HTML through this method
+        parseTokensToHTML(subCategories, labValues, savedRules); // constructing the conditional builder HTML through this method
         if (!config.editview_showlogicalbydefault) {
             $("#editrule .ruleconditions:last .logicalform").hide();
             $("#editrule .ruleconditions:last .showlogicalform").show();
@@ -996,9 +1245,13 @@ function getRuleString(obj) {
     var interpreterString = ""; // stores the code form (the one which is interpreted later) of the rule definition
 
     var groupObj = $(obj).children(".groupclass").first();// groupclass div  
-    var andOr = $(groupObj).find("select.anyall").val();            
-    andOr =  (andOr === 'Any')?" OR " : " AND ";                   
-    var andOrIntepreter =  (andOr === ' OR ')?" || " : " && ";
+    var andOr = $(groupObj).find("select.anyall").val();
+    var andOrIntepreter =  (andOr === 'Any')?" || " : " && ";
+    if (andOr === 'Any') {
+        var anyKval = $(groupObj).find(".inputforany").val();
+        if (anyKval > 1)
+            andOrIntepreter = " ||"+ anyKval+" ";
+    }
     var conditions = $(obj).children(".groupclass").first().next().find(".acondition"); // conditions defined in conditionclass div
     var conditionsLength = conditions.length;
     var counter = 0;
@@ -1037,7 +1290,7 @@ function getRuleString(obj) {
             //str += andOr + " [ " + inStr +" ] ";
             interpreterString += andOrIntepreter + " ( " + inStr +" ) ";
         }
-    });
+    });    
     return interpreterString;
 }            
 

@@ -4,7 +4,7 @@
             {"Metabolic Alkalosis": "maxbicarbonate > 30.0"}
         ]},
     {"Anemia" : [                
-            { "Acute": "( minHb < lowHb || minHc < lowHc ) && ( prevMinHb > lowHb && prevMinHc > lowHc )"},
+            { "Acute": "minHb < lowHb && minHc < lowHc  && ( prevMinHb > lowHb ||2 prevMinHc > lowHc ||2 prevMinHb > lowHb ||2 ( prevMinHc > lowHc && prevMinHc > lowHc && prevMinHc > lowHc ) )"},
             { "Anemic": "( minHb < lowHb || minHc < lowHc ) && ( prevMinHb ==-1 && prevMinHc ==-1 )"},
             { "Chronic": "( minHb < lowHb || minHc < lowHc ) && ( prevMinHb < lowHb || prevMinHc < lowHc )"},
             { "Normal": "minHb > lowHb && minHc > lowHc"}

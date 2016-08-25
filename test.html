@@ -7,31 +7,19 @@
         <script type="text/javascript" src="rule.interpreter.evaluator.js"></script>        
         <script   src="https://code.jquery.com/jquery-1.12.4.min.js"   integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="   crossorigin="anonymous"></script>
         <script>
+                //var rule = " g ||2 h ||2 i";
+                var rule = " macy_frenchcuff !=-1 ||2 c < d ||2 e == f";
+                var tokens = lexer(rule);
+                var parseTree = parse(tokens);
+                console.log(parseTree);
+                var variables = {"a":30, "b":31, "c":32, "d":31, "e":30, "f": 30, "g": 30, "h" : 30};
+                var output = evaluate(parseTree, variables, {"macy frenchcuff":[{"water":false}]});
+                console.log(output)
                 $(document).ready(function(){
                     $("#parseRule").click(function(){
                         checkClinicalComorbidities();
                     });    
-                });
-                
-                /*var variables = {
-                    "minHb":10,
-                    "minHc":40,
-                    "prevMinHb":90,
-                    "prevMinHc":90,
-                    "lowHb":13.5,
-                    "lowHc":40,
-                    "temperature": 60,
-                    "minwbc": 10,
-                    "minrbc": 20, 
-                    "minplt": 20,
-                    "wbclow": 50,
-                    "rbclow": 60,
-                    "pltlow": 70,
-                    "minbicarbonate":30,
-                    "maxbicarbonate":50,
-                    "chol":210
-                }*/
-                //var ruleTextE = '[{"anemia":[{ "normal": "( ( minHb > lowHb ) && ( minHc > lowHc ) )"},{ "acute": "( ( ( minHb < lowHb ) || ( minHc < lowHc ) ) && ( ( prevMinHb > lowHb ) && ( prevMinHc > lowHc ) ) )"}]},{"high temperature":"( temperature > 50 )"}]';                
+                });                               
                 
                 function checkClinicalComorbidities()
                 {

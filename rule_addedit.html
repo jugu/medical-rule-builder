@@ -46,13 +46,14 @@
 		<div id = "subcategoryTemplate" style='display:none'>
 			<div class = "ruleconditions">
 				<h2><span class='expandcollapse'>-</span>
-                    <input type ='checkbox'/>use for other rules? Conditions for :
-                    <input class="definition" type = 'text'/>&nbsp;&nbsp;&nbsp;&nbsp;<button class='removecategory' title="Delete this subcategory">X</button><span class="nameerror"></span>	</h2>
+                    Conditions for :
+                    <input class="definition" type = 'text'/>
+                    <button class='removecategory' title="Delete this subcategory">X</button><span class="nameerror"></span></h2>
                 <div class="textandlogicalform">
                     <div class="textform" align="center">
                         <div style="overflow: auto; width:80%; text-align:left">
-                            <div contenteditable="false" class="textrule"><span style='color:lightgrey'>Text format of the rule will appear here....</span></div>
-                            <div class="isrulevalid"><span>Definition is invalid</span>&nbsp;<button class="clear">Clear</button></div>
+                            <div contenteditable="true" class="textrule"><span style='color:lightgrey'>Text format of the rule will appear here....</span></div>
+                            <div class="isrulevalid"><span></span>&nbsp;<button class="clear">Clear</button></div>
                         </div>
                         <div class="showlogicalform">Show editable version</div>
                     </div>                    
@@ -63,8 +64,14 @@
                                     <option>All</option>
                                     <option>Any</option>
                                 </select>
-                                of the following conditions are met:					
-                                <button class="condition" >+ Add condition</button>					
+                                <span>of the following conditions are met:</span>
+                                <div class="dropdown">
+                                  <button class="condition" >+ Add condition</button>
+                                  <div class="dropdown-content">
+                                    <a class='conditionlabvalue'>Use labvalue</a>
+                                    <a class='conditionsubrule'>Use previously defined subcategory</a>
+                                  </div>
+                                </div>                                
                                 <button class="groupcondition">(+) Add group condition</button>
                                 <button class="removegroupcondition">(-) Remove group</button>
                             </div>

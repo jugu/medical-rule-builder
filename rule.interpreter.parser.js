@@ -13,7 +13,7 @@ var parse = function (tokens) {
 		};
 	};
 
-	var interpretToken = function (token) {
+	var interpretToken = function (token) {   
 		var sym = Object.create(symbols[token.type]);
 		sym.type = token.type;
 		sym.value = token.value;
@@ -27,19 +27,25 @@ var parse = function (tokens) {
 		var left, t = token();
 		advance();
 		if (!t.nud) throw "Unexpected token: " + t.type;
-		left = t.nud(t);
-		while (rbp < token().lbp) {
+		left = t.nud(t);		
+        while (rbp < token().lbp) {
 			t = token();
 			advance();
-			if (!t.led) throw "Unexpected token: " + t.type;
+			if (!t.led) throw "Unexpected token: " + t.type;            
 			left = t.led(left);
+            if (t.type == '||') {
+                left.value = t.value;
+            }
 		}
+        if (t.type == '||') {
+            left.value = t.value;
+        }
 		return left;
 	};
 
 	var infix = function (id, lbp, rbp, led) {
 		rbp = rbp || lbp;
-		symbol(id, null, lbp, led || function (left) {
+		symbol(id, null, lbp, led || function (left) {     
 			return {
 				type: id,
 				left: left,
