@@ -113,6 +113,23 @@ div.associationgroupclass {
     /*top:45%;*/
     /*display:none;*/
 }
+div.message {
+    float:left;
+    width:80%
+}
+div.messageclose {    
+    color: #aaaaaa;
+    font-size: 28px;
+    float:left;
+    width:20%;
+    text-align: left;
+    font-weight: bold;
+}
+div.messageclose:hover,
+div.messageclose:focus {
+    color: #000;
+    cursor: pointer;
+}
 div.definedrules {
     height:auto;
 }
@@ -204,6 +221,18 @@ div.showlogicalform:focus{
     color:blueviolet;
     font-weight: bold;
     text-decoration: underline;
+}
+div.topmessage {
+    position: fixed;
+    z-index: 100;
+    top : 0;
+    width: 100%;
+    height: 40px;
+    background-color: #dff0d8;
+    border-color: #dff0d8;
+    color: black;
+    font-size: 20px;
+    display:none;
 }
 div.vieweditparent {
     width:100%; 

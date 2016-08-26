@@ -143,6 +143,7 @@ function postLoadData() {
 
 // This will populate list of predefined rules in the Edit view
 function populateDefinedRules(savedRulesJSON) {
+    $(".definedrules").html("");
     for (var i = 0; i < savedRulesJSON.length; i++) {
         for (key in savedRulesJSON[i]) {
             $(".definedrules").append("<p>"+key+"</p>");
@@ -187,6 +188,7 @@ function attachEventHandlers() {
         $(this).parent().parent().find(".rulename").val(currentEditComorb);
         if (ruleObj != null){
             generateRuleTemplateFromText(ruleObj, labValueMap, savedRulesJSON);
+            invokeMessage("Rule reset successfully!", "SUCCESS");
         }
     });
 
@@ -224,12 +226,12 @@ function attachEventHandlers() {
         $(".definedrules p").removeClass();
         $(".nameerror").html("");
         $(".vieweditright #editrule").hide();
-        if (newSavedRules.length > 0) {
-            populateDefinedRules(newSavedRules);
+        if (newSavedRules.length > 0) {            
             for (var i = 0; i < newSavedRules.length; i++)
                 savedRulesJSON.push(newSavedRules[i]);
             newSavedRules = [];
         }
+        populateDefinedRules(savedRulesJSON);
     });
 
     // This event handler organnizes the lhs (and/or rhs) options based on the preselected values as part of ADD flow
@@ -518,6 +520,7 @@ function attachEventHandlers() {
     // Saving the rule in the ADD flow
     $("#addrule").on("click", ".saveAdd", function() {  // Save Function on adding a new rule
         if (!validateFieldsOnSave("#addrule")) {
+            invokeMessage("Errors found when saving!", "FAILURE");
             return;
         }
         var saveObject = {};                
@@ -549,7 +552,8 @@ function attachEventHandlers() {
     $("#editrule").on("click", ".saveEdit", function() {  // Save Function
         if (!validateFieldsOnSave("#editrule")) {
             var message = "Errors exist in the rule definition. Please check!"
-            invokeModal(message, "FAILURE");
+            invokeMessage(message, "FAILURE");
+            //invokeModal(message, "FAILURE");
             return;
         }
         var saveObject = {};                
@@ -562,8 +566,7 @@ function attachEventHandlers() {
             var obj = null;
             for (var i = 1; i <= categorycount; i++) {
                 obj = $("#editrule .ruleconditioncomponent .ruleconditions:nth-child("+i+")");
-                var definition = $(obj).find(".definition").val();
-                debugger;
+                var definition = $(obj).find(".definition").val();                
                 var rule = $($(obj).find(".textrule")).data("itext");
                 var categoryObj = {};
                 categoryObj[definition] = rule;
@@ -581,15 +584,42 @@ function attachEventHandlers() {
                 }
             }
         }//CANDO beautify successful operation message        
-        var message = "Changes saved Successfully!"
-        invokeModal(message, "SUCESSS");        
+        var message = "Changes saved Successfully!";
+        invokeMessage(message, "SUCCESS");        
     });
+    
+    $(".topmessage .messageclose").mouseover(function() {
+        clearTimeout();
+    }).click(function() {
+        clearTimeout();    
+        $(".topmessage").hide();
+    })
     
     $(".modalclose").click(function() {
         $("div.modalTemplate").hide();
         $("div.modalTemplate").removeClass("successdiv");
         $("#tabs-container").css({"opacity" : 1});    
         $("body").css({"background-color" : "white"});
+    });
+    
+    $("#editrule").on("click", "button.delete", function() {
+        var ruleName = $(".definedrules").find(".selected_edit_rule").html();
+        var index = -1;
+        for (var i = 0; i < savedRulesJSON.length; i++) {
+            for (var key in savedRulesJSON[i]) {
+                if (ruleName === key) {
+                    index = i;
+                }
+            }
+        }
+        if (index >= 0) {
+            delete savedRulesJSON[index][ruleName];
+            $(".edittab").click();
+            invokeMessage("Rule deleted successfully!", "SUCCESS");
+        }
+        else {
+            invokeMessage("Rule deletion failed!", "FAILURE");
+        }
     });
 }  // end of attachEventHandlers function
 
@@ -742,6 +772,19 @@ function removeAssociations(ruleTemplateObj) {
     }    
 }
 
+function invokeMessage(message, status) {    
+    if (status == 'SUCCESS') {
+        $(".topmessage .message").html(message);
+        $(".topmessage").css({"background-color": "#dff0d8", "color" : "#3c763d"});
+    }
+    else if (status == "FAILURE") {
+        $(".topmessage .message").html(message);
+        $(".topmessage").css({"background-color": "#f2dede", "color" : "#a94442"});
+    }
+    $(".topmessage").slideToggle();
+    setTimeout(function() {$(".topmessage").slideToggle()}, 3000);
+}
+
 function invokeModal(message, kindOfMessage) {
     $(".vieweditright #editrule").hide();
     $("div.modalTemplate").show();
@@ -753,7 +796,7 @@ function invokeModal(message, kindOfMessage) {
 }
 
 function triggerSuccessfulAddition() {//TODO beautify alert
-    invokeModal("Rule Saved Successfully", "SUCCESS");
+    invokeMessage("Rule Saved Successfully", "SUCCESS");
     $("#addrule .rulename").val("");
     $("#addrule .declaredrule").html("");
     $("#addrule .hassubcategory").prop("checked", "");
