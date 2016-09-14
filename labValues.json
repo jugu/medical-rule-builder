@@ -22,7 +22,7 @@
 		  {
 			"id": "lowHb",
 			"name": "Low Hemoglobin standard",
-            "pairwith" : ""            
+            "pairwith" : ""
 		  },
 		  {
 			"id": "lowHc",
@@ -305,6 +305,11 @@
             "pairwith" : ""
           },
           {
+            "id" : "minTemp",
+            "name" : "Minimum Temperature",
+            "pairwith" : ""
+          },
+          {
             "id" : "meanArtPressure",
             "name" : "Mean Arterial Pressure",
             "pairwith" : ""
@@ -338,6 +343,11 @@
             "id" : "urnLeucEster",
             "name" : "Urinalysis Leukocyte Esterase",
             "pairwith" : ""
+          },
+          {
+              "id": "age",
+              "name" : "Age",
+              "pairwith" : ""
           }
             
 		]

@@ -40,6 +40,11 @@ function attachEventHandlesForTesting() {
     $(".executerules").on("click", function() {
        executeRules(); 
     });
+    
+    /*Realtime?*/
+    $(".labvalueformdiv").on("change keyup","input", function() {
+        executeRules();
+    })
 }
 
 function executeRules()
@@ -178,6 +183,7 @@ function populateLabForm(selectedRules) {
     for (var i = 0; i < labAttributes.length; i++) {
         var id = labAttributes[i]["id"];
         var name = labAttributes[i]["name"];
+        var val = 0;
         $(".labvalueformdiv").append("<div class='labformrow' style='height:30px'><span style='width:300px;display:inline-block'>"+name+":</span><input type='text' id='"+id+"' style='width:50px'/><span class='nameerror'></span></div>");
     }
 }

@@ -258,11 +258,22 @@ function attachEventHandlers() {
     $("#editrule .multipreselect").on("select2:select select2:unselect", function (e) {
         //this returns all the selected item
         var preselectOptions = [];                
-        var items= $(this).children(":selected");				
+        var items= $(this).children(":selected");        
         $.each(items, function (index, element){
-            preselectOptions.push({"id":element.value, "name": element.text});
+            var doAdd = true;
+            for (var i = 0; i < preselectedOptions.length; i++) {
+                if (preselectedOptions[i].hasOwnProperty("id")) {
+                    if (preselectedOptions[i]["id"] == element.value) {
+                        doAdd = false;
+                        break;
+                    }
+                }
+            }
+            if (doAdd)
+                preselectOptions.push({"id":element.value, "name": element.text});
         });
-        organizeOptions(preselectOptions, "#editrule");
+        var doPreselectedOptionsExist = (preselectedOptions.length > 0);
+        organizeOptions(preselectOptions, "#editrule", doPreselectedOptionsExist);
     });
 
     // This event handler toggles the display div of the preselect (Lab Dictionary) options in the EDIT flow
@@ -837,27 +848,40 @@ function validateFieldsOnSave(parentId) {
 }
 
 // This method populates the LHS and RHS options based on the preselected lab values. If no preselected labvalues are present, then all the lab values are added as options
-function organizeOptions(optionsToPopulate, parentId) {
-    var $selectN = $(".lhs");
-    $(".lhs").empty();
-    $.each(optionsToPopulate, function(key, val){ 
-        $selectN.append('<option value="' + val.id + '">' + val.name + '</option>');                
-    });
-
-    $selectN = $(".rhs");
-    $(".rhs").empty();
+function organizeOptions(optionsToPopulate, parentId, areOptionsPrePopulatedForEditView) {
     var rhsValues = [];
+    //console.log(optionsToPopulate, areOptionsPrePopulatedForEditView)
     $.extend(rhsValues, optionsToPopulate);
-    $.merge(rhsValues, commonSelectors);            
+    if (!areOptionsPrePopulatedForEditView) {            
+        $(".lhs").empty();
+        $(".rhs").empty();   
+        $.merge(rhsValues, commonSelectors);
+    }
+    var $selectN = $(".lhs");
+    //TODO Duplicate population of selected lab value when selecting another one.
+    $.each(optionsToPopulate, function(key, val){
+        var found = false;
+        $(".lhs > option").each(function() {
+            if (this.value == val.id) {
+                found = true;
+                return false;
+            }                
+        });
+        if (!found)
+            $selectN.append('<option value="' + val.id + '">' + val.name + '</option>');                
+    });
+    $selectN = $(".rhs"); 
     $.each(rhsValues, function(key, val){ 
-        $selectN.append('<option value="' + val.id + '">' + val.name + '</option>');
-      });
-    $(".labattributes").empty();
-    $.each(optionsToPopulate, function(key, val){ 
-        $(".labattributes").append('<p class="labvals">' + val.name + '</p>');                 
-        $(".labattributes").children().last().data("value", val.id);                                        
-    });	
-
+        var found = false;
+        $(".rhs > option").each(function() {
+            if (this.value == val.id) {
+                found = true;
+                return false;
+            }                
+        });
+        if (!found)
+            $selectN.append('<option value="' + val.id + '">' + val.name + '</option>');
+    });
 }
 
 function determineCurrentRuleDiv(parents) {
@@ -1278,7 +1302,8 @@ function populateLabDictionary(subCategories, hasSubCategories, subCategoriesCou
         var ruleStr = subCategories;
         var tokens = ruleStr.split(/\s+/); 
         getLabValuesFromTokens(labDict, auxDict, tokens);
-    }    
+    }
+    preselectedOptions = labDict;
     organizeOptions(labDict, "#editrule");
     $("#editrule .multipreselect").select2().val(auxDict).trigger("change");    
 }
