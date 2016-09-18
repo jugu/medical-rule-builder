@@ -11,6 +11,9 @@ To run the code locally
 (The only libraries/plugins used are JQuery and select2)
 This is an online rule builder tool. Currently customized for dynamically creating/editing rules for illnesses/diseases. This can be used to create any kind of rule definitions and/or for building queries. 
 
+The interpreter is inspired by Douglas Crockford's Top Down Operator Precedence parser
+http://javascript.crockford.com/tdop/tdop.html 
+
 ---
 
 ### Features
