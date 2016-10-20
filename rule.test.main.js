@@ -144,6 +144,21 @@ function populateTestRules(savedRules) {
     populateLabForm(savedRulesJSON);
 }
 
+function pushTokens(tokens, labAttributes, labFormMap) {
+    for (var k = 0; k < tokens.length; k++) {
+        if (labValueMap.hasOwnProperty(tokens[k]) && !labFormMap.hasOwnProperty(tokens[k])) {            
+            labFormMap[tokens[k]] = true;
+            var inbuiltTokens = checkInBuilt(tokens[k]);
+            console.log(inbuiltTokens);
+            if (inbuiltTokens != null) {
+                pushTokens(inbuiltTokens, labAttributes, labFormMap);
+            }
+            else 
+                labAttributes.push({"id":tokens[k], "name":labValueMap[tokens[k]]});
+        }
+    }
+}
+
 function populateLabForm(selectedRules) {
     var labAttributes = [];
     var labFormMap = {};
@@ -152,30 +167,20 @@ function populateLabForm(selectedRules) {
         for (key in ruleObj) {
             var subCategories = ruleObj[key];
             var valueType = Object.prototype.toString.call(subCategories);
-            if (valueType === '[object Array]') {          
+            if (valueType === '[object Array]') {
                 var subCategoriesCount = subCategories.length;
                 for (var j = 0; j < subCategoriesCount; j++) {
                     for (key in subCategories[j]) {
-                        var ruleStr = subCategories[j][key];                
+                        var ruleStr = subCategories[j][key];      
                         var tokens = ruleStr.split(/\s+/);
-                        for (var k = 0; k < tokens.length; k++) {
-                            if (labValueMap.hasOwnProperty(tokens[k]) && !labFormMap.hasOwnProperty(tokens[k])) {
-                                labFormMap[tokens[k]] = true;
-                                labAttributes.push({"id":tokens[k], "name":labValueMap[tokens[k]]});
-                            } 
-                        }
+                        pushTokens(tokens, labAttributes, labFormMap);
                     }
                 }
             }
             else {
-                var ruleStr = ruleObj[key];                
+                var ruleStr = ruleObj[key];
                 var tokens = ruleStr.split(/\s+/);
-                for (var k = 0; k < tokens.length; k++) {
-                    if (labValueMap.hasOwnProperty(tokens[k]) && !labFormMap.hasOwnProperty(tokens[k])) {
-                        labFormMap[tokens[k]] = true;
-                        labAttributes.push({"id":tokens[k], "name":labValueMap[tokens[k]]});
-                    } 
-                }
+                pushTokens(tokens, labAttributes, labFormMap);
             }
             break;
         }
@@ -186,4 +191,14 @@ function populateLabForm(selectedRules) {
         var val = 0;
         $(".labvalueformdiv").append("<div class='labformrow' style='height:30px'><span style='width:300px;display:inline-block'>"+name+":</span><input type='text' id='"+id+"' style='width:50px'/><span class='nameerror'></span></div>");
     }
+}
+
+function checkInBuilt(token) {
+    var inmap = {
+                    "bmi" : "height,weight"
+                };
+    if (inmap.hasOwnProperty(token)) {
+        return inmap[token].split(",");
+    }
+    return null;
 }

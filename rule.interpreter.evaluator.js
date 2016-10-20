@@ -53,11 +53,23 @@ var evaluate = function (parseTree, vars, processedResult) {
 		sqrt: Math.sqrt,
 		max: Math.max,
 		min: Math.min,
-		random: Math.random
-	};
-	var args = {
-	};
-    
+		random: Math.random,
+        bmi : function(obj) {
+                if (obj.hasOwnProperty("height") && obj.hasOwnProperty("weight")) {
+                    var height = obj["height"];
+                    var weight = obj["weight"];
+                    if (height > 0 && weight > 0)
+                        return (weight)/((height/100)*(height/100));
+                }
+                return -1;
+               }
+	};    
+    var checkInBuiltFn = function (keyToCheck) {
+        if (functions.hasOwnProperty(keyToCheck))
+            return true;
+        return false;
+    }    
+	var args = {};
     // This function is used for cases where we are using a previously defined comorbidity condition as part of current condition. 
     // We check for the current condition argument in the list of previously defined comorbidity conditions (and its evaluated value)
     //  and then plug in the values of the result
@@ -130,9 +142,12 @@ var evaluate = function (parseTree, vars, processedResult) {
             }
 			return operators[node.type](parseNode(node.left, anyKLevel, oldResults));
 		}
-		else if (node.type === "identifier") {  
+		else if (node.type === "identifier") {            
 			var value = args.hasOwnProperty(node.value) ? args[node.value] : variables[node.value];
             if (typeof value === "undefined") {
+                if (checkInBuiltFn(node.value)) {
+                    return functions[node.value](variables);
+                }
                 value = checkValueAsPreviouslyDefinedRule(node.value, oldResults);
             }
 			if (typeof value === "undefined") throw node.value + " is undefined";

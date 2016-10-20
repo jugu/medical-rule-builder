@@ -220,8 +220,23 @@
             "pairwith" : ""
           },
           {
+            "id" : "height",
+            "name" : "Height (in cm)",
+            "pairwith" : ""
+          },
+          {
+            "id" : "weight",
+            "name" : "Weight (in Kg)",
+            "pairwith" : ""
+          },        
+          {
             "id" : "minWBC", 
-            "name" : "Minimum WBC count",
+            "name" : "Low WBC count",
+            "pairwith" : "lowWBC"
+          },
+		  {
+            "id" : "maxWBC", 
+            "name" : "High WBC count",
             "pairwith" : "lowWBC"
           },
           {
@@ -346,7 +361,22 @@
           },
           {
               "id": "age",
-              "name" : "Age",
+              "name" : "Age(in years)",
+              "pairwith" : ""
+          },
+          {
+              "id": "agem",
+              "name" : "Age(in months)",
+              "pairwith" : ""
+          },
+          {
+              "id": "agew",
+              "name" : "Age(in weeks)",
+              "pairwith" : ""
+          },
+          {
+              "id": "aged",
+              "name" : "Age(in days)",
               "pairwith" : ""
           }
             
