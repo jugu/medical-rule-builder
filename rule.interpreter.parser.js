@@ -75,6 +75,10 @@ var parse = function (tokens) {
 	symbol(",");
 	symbol(")");
 	symbol("(end)");
+    
+    symbol("constant", function (constant) {
+       return constant; 
+    });
 
 	symbol("number", function (number) {
 		return number;

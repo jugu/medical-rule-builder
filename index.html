@@ -14,7 +14,11 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
 		<script src="rule.addedit.main.js"></script>
         <script src="rule.test.main.js"></script>
-		<script>                    
+		<script>          
+			/*var output = parseRule("a - ( b - c )",{"a":100,"b":20,"c":30}, {});		
+			console.log(output);
+			output = parseRule("( a -  b ) - c ",{"a":100,"b":20,"c":30}, {});		
+			console.log(output);*/
             $(document).ready(function() {
                 loadLabValues();
                 attachEventHandlers();

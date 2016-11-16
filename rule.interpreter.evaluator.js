@@ -153,6 +153,9 @@ var evaluate = function (parseTree, vars, processedResult) {
 			if (typeof value === "undefined") throw node.value + " is undefined";
 			return value;
 		}
+        else if (node.type === "constant") {
+            return node.value;
+        }
         else if (node.type === "number") {
             return node.value;
         }

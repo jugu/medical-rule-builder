@@ -57,7 +57,7 @@ function executeRules()
     for (var i = 0; i < formObjArray.length; i++) {
         var key = $(formObjArray[i]).children("input").attr("id");
         var val = $(formObjArray[i]).children("input").val();
-        if (val == '' || isNaN(val)) {
+        if (val == '') {
             $(formObjArray[i]).children("span:last").html("Incorrect value");
             doExecute = false;
         }
@@ -189,7 +189,7 @@ function populateLabForm(selectedRules) {
         var id = labAttributes[i]["id"];
         var name = labAttributes[i]["name"];
         var val = 0;
-        $(".labvalueformdiv").append("<div class='labformrow' style='height:30px'><span style='width:300px;display:inline-block'>"+name+":</span><input type='text' id='"+id+"' style='width:50px'/><span class='nameerror'></span></div>");
+        $(".labvalueformdiv").append("<div class='labformrow' style='height:30px'><span style='width:300px;display:inline-block'>"+name+":</span><input type='text' id='"+id+"' style='width:100px'/><span class='nameerror'></span></div>");
     }
 }
 

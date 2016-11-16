@@ -4,6 +4,7 @@
 
 // Support for exceptional cases when building rules
 var CONSTANTS = {
+    "CONSTANTSTRING" : "constant",
     "NUMBERSTRING" : "number",
     "MULTIPLESTRING" : "multiple",
     "PRESENT" : "!=-1",
@@ -54,7 +55,8 @@ $.merge(operatorButtons, operators);
 //These are the common list of selectors for Operators dropdown which manipulate the display of condition
 var commonSelectors = [
     {"id":"number", "name":"value"},
-    {"id":"multiple", "name":"multiple of"}
+    {"id":"multiple", "name":"multiple of"},
+    {"id":"constant", "name":"text"}
 ];
 
 var commonSelectorMap = {};
@@ -459,8 +461,8 @@ function attachEventHandlers() {
 
     // Changing the right hand side of the condition operands
     $(".ruleconditioncomponent").on("change", ".acondition .rhs", function() {
-        var rhsVal = $(this).children(":selected").attr("value");
-        if (rhsVal == CONSTANTS.NUMBERSTRING) {
+        var rhsVal = $(this).children(":selected").attr("value");        
+        if (rhsVal == CONSTANTS.NUMBERSTRING || rhsVal == CONSTANTS.CONSTANTSTRING) {
             if ($(this).next().prop("nodeName") !== 'INPUT') {
                 $("<input type='text' value='0' style='width:50px;margin-left:5px;margin-right:5px'/>").insertBefore($(this).parent().children().last());
                 $(this).next().focus();
@@ -1087,6 +1089,7 @@ var parseTokensToText = function (interpText) {
 // This function has a recursive method implementation to construct the rule HTML from the interpreter text for edit view
 var parseTokensToHTML = function (interpText, labValuesMap, definedRules, currentName, currentSubCategories) {
     var tokens = lexer (interpText);
+    console.log(tokens);
     var parseTree = parse(tokens);
     var node = parseTree[0];// for one comorb rule there will be only one parse tree            
     var parent = $("#editrule div.ruleconditions:last div.logicalform div.ruleTemplate:last p:first");
@@ -1145,9 +1148,9 @@ var parseTokensToHTML = function (interpText, labValuesMap, definedRules, curren
             }
         }
         else if (identifierOnWhichSide === 'RIGHT') {
-            if (node.type === CONSTANTS.NUMBERSTRING) {// special case for numerical input
+            if (node.type === CONSTANTS.NUMBERSTRING || node.type === CONSTANTS.CONSTANTSTRING) {// special case for numerical input
                 $(parent).find(".acondition:last .rhs").val(node.type);
-                var inputTextBox = "<input type='text' value='"+node.value+"'/>"
+                var inputTextBox = "<input type='text' value="+node.value+"/>"
                 $(inputTextBox).insertAfter($(parent).find(".acondition:last .rhs"));
             } else if (node.type === "*") { // special case for multiple
                 $(parent).find(".acondition:last .rhs").val(CONSTANTS.MULTIPLESTRING);
@@ -1163,7 +1166,7 @@ var parseTokensToHTML = function (interpText, labValuesMap, definedRules, curren
         }
         if (addcondition || conditionAppend) {
             //parent = $(parent).first();
-            if (node.type !== 'identifier' && node.type !== 'number' && node.type !== '*') {
+            if (node.type !== 'identifier' && node.type !== 'number' && node.type !== '*' && node.type !== 'constant') {
                 $(parent).append($("#conditionTemplate").html());   
                 $(parent).find(".acondition:last .operator").val(node.type);
                 if (node.type == '==-1' || node.type =='!=-1') { // special case for present/not present
@@ -1329,10 +1332,16 @@ function getRuleString(obj) {
         interpreterString += operatorid + " ";
         if (operatorid !== CONSTANTS.NOTPRESENT && operatorid !== CONSTANTS.PRESENT) {
             var rhsid = $(this).find(".rhs").children(":selected").attr("value");                                
-            if ( rhsid === CONSTANTS.NUMBERSTRING) {
-                var numericalValue = $(this).find(".rhs").next().val();
-                //str += numericalValue + " ";
-                interpreterString += numericalValue + " ";
+            if ( rhsid === CONSTANTS.NUMBERSTRING || rhsid === CONSTANTS.CONSTANTSTRING) {
+                if (rhsid === CONSTANTS.NUMBERSTRING) {
+                    var numericalValue = $(this).find(".rhs").next().val();
+                    //str += numericalValue + " ";
+                    interpreterString += numericalValue + " ";
+                }
+                else {
+                    var textValue = $(this).find(".rhs").next().val();
+                    interpreterString += "'" + textValue + "' ";
+                }
             } else if (rhsid === CONSTANTS.MULTIPLESTRING) {
                 var numericalValue = $(this).find(".rhs").next().val();
                 var rhsValue = $(this).find(".rhs:last").children(":selected").attr("value");

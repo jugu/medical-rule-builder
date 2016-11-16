@@ -19,12 +19,12 @@ var lexer = function (input) {
     var t_DIV = /\//; operator_tokens.push(t_DIV);
     var t_MUL = /\*/; operator_tokens.push(t_MUL);
     var t_PRESENT = /!=-1/; operator_tokens.push(t_PRESENT);
-    var t_NOTPRESENT = /==-1/; operator_tokens.push(t_NOTPRESENT);    
-        
+    var t_NOTPRESENT = /==-1/; operator_tokens.push(t_NOTPRESENT);            
     
     var t_ID = /^[a-zA-Z]\w*$/;
     var t_NUM = /^-?\d*(\.\d+)?$/;
-    var t_RULE = /^[a-zA-Z]\w+#(\w+)?:$/
+    var t_RULE = /^[a-zA-Z]\w+#(\w+)?:$/;
+    var t_CONSTANTSTRING = /^\'.*\'$/;
     
     var isOperator = function (str) {
         var found = false;
@@ -49,6 +49,11 @@ var lexer = function (input) {
     var isIdentifier = function (str) {
         return t_ID.test(str);
     }
+    
+    var isConstantStr = function (str) {
+        return t_CONSTANTSTRING.test(str);
+    }
+    
     var wordArr = input.replace(/^\s+|\s+$/gm,"").split(/\s+/);
     var tokens = [];
     
@@ -87,6 +92,9 @@ var lexer = function (input) {
         }
         else if (isRule(word)){
             addToken("rule", word);
+        }
+        else if (isConstantStr(word)) {
+            addToken("constant", word);
         }
         else {
             console.log(word);
